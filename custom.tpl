@@ -3,7 +3,24 @@
 
 {{ super() }}
 
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400' rel='stylesheet' type='text/css'>
 <style>
+@font-face {
+  font-family: 'Museo Slab 700';
+  src: url('../font/Museo_Slab_700-webfont.eot');
+  src: url('../font/Museo_Slab_700-webfont.eot?#iefix') format('embedded-opentype'),
+       url('../font/Museo_Slab_700-webfont.woff') format('woff'),
+       url('../font/Museo_Slab_700-webfont.ttf') format('truetype'),
+       url('../font/Museo_Slab_700-webfont.svg#MuseoSlab700Regular') format('svg');
+  font-weight: bold;
+  font-style: normal;
+
+}
+
+body {
+  font-family: 'Open Sans';
+}
+
 .rendered_html tbody tr:hover, .rendered_html tbody tr {
   background: none !important;
 }
@@ -15,6 +32,10 @@ div.text_cell {
 }
 .prompt {
   display: none;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Museo Slab 700';
 }
 
 #notebook-container {
