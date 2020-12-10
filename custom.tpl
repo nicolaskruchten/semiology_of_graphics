@@ -21,6 +21,11 @@ body {
   font-family: 'Open Sans';
 }
 
+h1 {
+  text-align: center;
+  line-height: 1.1 !important;
+}
+
 .rendered_html tbody tr:hover, .rendered_html tbody tr {
   background: none !important;
 }
@@ -30,7 +35,7 @@ div.text_cell {
     max-width: 750px;
     margin: 10px auto;
 }
-.prompt {
+.prompt, .anchor-link {
   display: none;
 }
 
