@@ -108,7 +108,7 @@ Here's the same data in a stacked bar chart, which lets us more easily see the t
 ```python
 fig = px.bar(long_df, x=long_df.index, y="quantity", color="sector", hover_name="department")
 fig.update_layout(bargap=0, legend_xanchor="right", legend_x=0.99, legend_y=0.99)
-fig.update_xaxes(type="category", tickfont_size=6, tickangle=-90)
+fig.update_xaxes(type="category", tickfont_size=5, tickangle=-90)
 fig.show()
 ```
 

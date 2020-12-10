@@ -11,9 +11,6 @@
   background: none !important;
 }
 div.text_cell_render {
-    max-width: 800px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
     line-height: 1.7 !important;
     font-size: 16px !important;
 }
@@ -23,6 +20,8 @@ div.text_cell_render {
 
 #notebook-container {
   max-width: 900px;
+  box-shadow: none;
+  -webkit-box-shadow: none;
 }
 
 div.output_subarea {
