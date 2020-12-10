@@ -4,22 +4,21 @@
 {{ super() }}
 
 <style>
-.rendered_html tbody tr:hover {
+.rendered_html tbody tr:hover, .rendered_html tbody tr {
   background: none !important;
 }
-.rendered_html tbody tr {
-  background: none !important;
-}
-div.text_cell_render {
+div.text_cell {
     line-height: 1.7 !important;
     font-size: 16px !important;
+    max-width: 750px;
+    margin: 10px auto;
 }
 .prompt {
   display: none;
 }
 
 #notebook-container {
-  max-width: 900px;
+  max-width: 1000px;
   box-shadow: none;
   -webkit-box-shadow: none;
 }
