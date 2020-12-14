@@ -14,26 +14,26 @@ jupyter:
 ---
 
 # Remaking Figures from <br>Bertin's *Semiology of Graphics*
-<p style="text-align: center">by <a href="https://nicolas.kruchten.com/">Nicolas Kruchten</a></p>
+<p style="text-align: center">by <a target="_blank" href="https://nicolas.kruchten.com/">Nicolas Kruchten</a></p>
 
 One of my favourite books about data visualization is [*Semiology of Graphics: Diagrams, Networks, Maps* by Jacques Bertin](https://books.google.ca/books/about/Semiology_of_Graphics.html?id=X5caQwAACAAJ&source=kp_book_description&redir_esc=y), from 1967. It's a dense, 450-page tome which is now considered a classic in the development of the field. Michael Friendly, in his [Brief History of Data Visualization](http://datavis.ca/papers/hbook.pdf), identifies it as one of three key factors in the late-20th century renaissance in data visualization (following a golden age in the 19th century and a dark age in the early 20th). One of my favourite parts of the book is a 40-page section called "The Graphic Problem", which enumerates by example 100 different visualizations of the same compact dataset, to outline what we would now call the design space of visualizations, and to forcefully make the point that the choice of which visualization to use for a given dataset is far from obvious. The dataset, which is printed in a small table at the beginning of the section, is quite simple on its face: the number of people working in agriculture, industry and services for each of 90 administrative divisions in France in 1954 (there are four other, derived columns: the sum of the first three, and each of the first three divided by the sum).
 
-I don't think I can reasonably reproduce the entire section at high resolution here, but I'm including an overview of 32 of those pages, which should give a sense of the breadth of visual forms covered. There are bar charts (faceted, stacked, reordered, variable-width), scatterplots and scatterplot matrices, a parallel-coordinates plot, some ternary plots, and that's before we even get to maps. There are cartograms and dot maps and choropleths and maps with pies and bars on them, and some stippled and striped maps that I don't believe have distinct names, as I've only ever seen them in this book!
+I don't think I can reasonably reproduce the entire section at high resolution here, but I'm including an overview of 32 of those pages, which should give a sense of the breadth of visual forms covered. There are bar charts (faceted, stacked, reordered, variable-width), scatterplots and scatterplot matrices, a parallel-coordinates plot, some ternary plots, and that's before we even get to maps. There are cartograms and dot maps and choropleths and maps with pies and bars on them, and some stippled and striped maps that I don't believe have common names, as I've only ever seen them in this book!
 
-[![spread](images/spread.png)](images/spread.png)
+<a target="_blank" href="images/spread.png"><img src="images/spread.png"></a>
 
 The dataset is quite similar to one I spent a lot of time exploring through visualizations: the vote split between the top 3 candidates in a local Montreal mayoral election, which I visualized as a [dot map](http://nicolas.kruchten.com/content/2013/12/dot-map-of-2013-montreal-election-results/), [ternary charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-ternary/), [mosaic charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-early_voting/), [choropleth maps](http://nicolas.kruchten.com/content/2014/01/mtlelection-zoomable-map/) and [pies-on-maps](http://nicolas.kruchten.com/content/2015/08/election-pies/). When I read this book I was pleased to see every idea I'd had was represented and I was fascinated to see so many new ones, and I've been wanting to remake these graphics with modern tools ever since. I recently read the excellent new book [*Visualizing With Text* by Richard Brath](https://books.google.ca/books/about/Visualizing_with_Text.html?id=dAoHEAAAQBAJ&source=kp_book_description&redir_esc=y), which includes a number of text-based remakes of these same figures, which motivated me to actually carry out this project. I'm pleased that the visualization library I've been working on for the past couple of years, [Plotly Express](https://plotly.express), is now mature enough to let me do a decent job at many of these graphics with just a few lines of code.
 
 
 ## An Intellectual Ancestor to Plotly Express
 
-Before getting into the remakes, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the one highlighted below, which the book explains how to interpret or generate.
+Before getting into the remakes, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the ones highlighted below in pink, which the book explains how to interpret or generate.
 
 <br />
 <table><tr>
-    <td><a href="images/glyphs.png"><img src="images/glyphs.png" alt="glyphs" style="height: 300px;"/></a></td>
-    <td><a href="images/glyphs2.png"><img src="images/glyphs2.png" alt="glyphs" style="height: 300px;"/></a></td>
-    <td><a href="images/glyphs3.png"><img src="images/glyphs3.png" alt="glyphs" style="height: 300px;"/></a></td>
+    <td><a target="_blank" href="images/glyphs.png"><img src="images/glyphs.png" alt="glyphs" style="height: 300px;"/></a></td>
+    <td><a target="_blank" href="images/glyphs2.png"><img src="images/glyphs2.png" alt="glyphs" style="height: 300px;"/></a></td>
+    <td><a target="_blank" href="images/glyphs3.png"><img src="images/glyphs3.png" alt="glyphs" style="height: 300px;"/></a></td>
 </tr></table>
 <br />
 
@@ -48,9 +48,9 @@ The first step to remaking these figures with Plotly Express was to get the data
 
 1. I undid [the 1964 reorganization](https://fr.wikipedia.org/wiki/R%C3%A9organisation_de_la_r%C3%A9gion_parisienne_en_1964#/media/Fichier:Ile_de_France_departments_1968_evolution_map-fr.svg) of the Paris-region departments by merging departments 91 and 95 into department 78, and merging 92, 93 and 94 into 75.
 2. I then subtracted the present-day department 75 (the city of Paris) from the resulting department 75 and labelled it "P", as in the dataset in the book. I believe that Paris was carved out from its surrounding department to avoid department 75 from totally dominating all figures population-wise, although this is not called out in the book specifically.
-3. I dropped Corsica (20) as no data was provided for this island department.
+3. I dropped Corsica as no data was provided for this island department, which explains the missing department number 20.
 4. I simplified the geometry of the polygons to reduce the file size and even out some of the inaccuracies I introduced when I merged the Paris-region departments. The simplified polygons have approximately the same level of detail as the maps in the book, which are only rendered a few inches across anyway.
-5. I added two new columns which I explain in the text below: `region`, which is the modern-day administrative division that regroups multiple departments, and `type`, which indicates the relative rank of the three economic sectors in a given department: type `A>S>I` means there are more people working in agriculture than in services, and more in services than industry, etc.
+5. I added two new columns which I use to generate certain figures below: `region`, which is the modern-day administrative division that regroups multiple departments, and `type`, which groups the departments into 6 distinct "types" based on the relative rank of the three economic sectors: type `A>S>I` means there are more people working in agriculture than in services, and more in services than industry, etc.
 
 Here is what the resulting dataset looks like, when loaded from [a 55kb GeoJSON file](https://nicolas.kruchten.com/semiology_of_graphics/data/semiology_of_graphics.geojson) using `geopandas`. (Note: for anyone wanting to play with this data, there's also [a CSV that doesn't include the polygons](https://nicolas.kruchten.com/semiology_of_graphics/data/semiology_of_graphics.csv).)
 
@@ -168,7 +168,7 @@ fig.show()
 
 Moving from bars to lines as a visual representation, here is a parallel coordinates chart where each department is one line that zigzags through its corresponding data points in 4 dimensions: the percentage of workers in each sector and the total population of the department. Lines are colored by the percentage of workers in industry in varying intensities of red, naturally. Try drag-selecting the dimensions to select/deselect lines!
 
-<a href="images/parcoords.png"><img src="images/parcoords.png" style="width: 300px;"></a>
+<a target="_blank" href="images/parcoords.png"><img src="images/parcoords.png" style="width: 300px;"></a>
 
 ```python
 fig = px.parallel_coordinates(wide_df, dimensions=["agriculture_pct", "industry_pct", "services_pct", "total"],
@@ -194,7 +194,7 @@ fig.show()
 ```
 
 
-<a href="images/ternary.png"><img src="images/ternary.png" style="width: 300px;"></a>
+<a target="_blank" href="images/ternary.png"><img src="images/ternary.png" style="width: 300px;"></a>
 
 ```python
 fig = px.scatter_ternary(wide_df, a="agriculture", b="industry", c="services", size="total",
@@ -205,7 +205,7 @@ fig.show()
 ```
 
 
-<a href="images/cartogram.png"><img src="images/cartogram.png" style="width: 300px;"></a>
+<a target="_blank" href="images/cartogram.png"><img src="images/cartogram.png" style="width: 300px;"></a>
 
 ```python
 fig = px.treemap(wide_df, path=[px.Constant("France"), "region", "department"], values="total",
@@ -214,7 +214,7 @@ fig.show()
 ```
 
 
-<a href="images/texture_map.png"><img src="images/texture_map.png" style="width: 300px;"></a>
+<a target="_blank" href="images/texture_map.png"><img src="images/texture_map.png" style="width: 300px;"></a>
 
 ```python
 fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
@@ -224,7 +224,7 @@ fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
 fig.show(config=dict(scrollZoom=False))
 ```
 
-<a href="images/value.png"><img src="images/value.png" style="width: 300px;"></a>
+<a target="_blank" href="images/value.png"><img src="images/value.png" style="width: 300px;"></a>
 
 ```python
 fig = px.choropleth(long_df, geojson=long_df.geometry, locations=long_df.index,
@@ -288,7 +288,7 @@ fig.add_trace(basepolygons, row="all", col="all")
 fig.show(config=dict(scrollZoom=False))
 ```
 
-<a href="images/stipple_map.png"><img src="images/stipple_map.png" style="width: 300px;"></a>
+<a target="_blank" href="images/stipple_map.png"><img src="images/stipple_map.png" style="width: 300px;"></a>
 
 ```python
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
@@ -314,8 +314,8 @@ fig.show(config=dict(scrollZoom=False))
 
 <br />
 <table><tr>
-    <td><a href="images/glyphs.png"><img src="images/chartmaps.png" alt="glyphs" style="width: 300px;"/></a></td>
-    <td><a href="images/glyphs2.png"><img src="images/stripes.png" alt="glyphs" style="width: 300px;"/></a></td>
+    <td><a target="_blank" href="images/glyphs.png"><img src="images/chartmaps.png" alt="glyphs" style="width: 300px;"/></a></td>
+    <td><a target="_blank" href="images/glyphs2.png"><img src="images/stripes.png" alt="glyphs" style="width: 300px;"/></a></td>
 </tr></table>
 <br />
 <!-- #endregion -->
