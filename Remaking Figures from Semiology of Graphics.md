@@ -27,7 +27,7 @@ The dataset is quite similar to one I spent a lot of time exploring through visu
 
 ## An Intellectual Ancestor to Plotly Express
 
-Before getting into the remakes, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the ones highlighted below in pink, which the book explains how to interpret or generate.
+Before getting into the figures, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the ones highlighted below in pink, which the book explains how to interpret or generate.
 
 <br />
 <table><tr>
@@ -49,12 +49,12 @@ The first step to remaking these figures with Plotly Express was to get the data
 1. I undid [the 1964 reorganization](https://fr.wikipedia.org/wiki/R%C3%A9organisation_de_la_r%C3%A9gion_parisienne_en_1964#/media/Fichier:Ile_de_France_departments_1968_evolution_map-fr.svg) of the Paris-region departments by merging departments 91 and 95 into department 78, and merging 92, 93 and 94 into 75.
 2. I then subtracted the present-day department 75 (the city of Paris) from the resulting department 75 and labelled it "P", as in the dataset in the book. I believe that Paris was carved out from its surrounding department to avoid department 75 from totally dominating all figures population-wise, although this is not called out in the book specifically.
 3. I dropped Corsica as no data was provided for this island department, which explains the missing department number 20.
-4. I simplified the geometry of the polygons to reduce the file size and even out some of the inaccuracies I introduced when I merged the Paris-region departments. The simplified polygons have approximately the same level of detail as the maps in the book, which are only rendered a few inches across anyway.
+4. I simplified the geometry of the polygons to reduce the file size and even out some of the inaccuracies I introduced when I merged the Paris-region departments. The simplified polygons have approximately the same level of detail as the maps in the book, which are only rendered a few centimeters across anyway.
 5. I added two new columns which I use to generate certain figures below: `region`, which is the modern-day administrative division that regroups multiple departments, and `type`, which groups the departments into 6 distinct "types" based on the relative rank of the three economic sectors: type `A>S>I` means there are more people working in agriculture than in services, and more in services than industry, etc.
 
-Here is what the resulting dataset looks like, when loaded from [a 55kb GeoJSON file](https://nicolas.kruchten.com/semiology_of_graphics/data/semiology_of_graphics.geojson) using `geopandas`. (Note: for anyone wanting to play with this data, there's also [a CSV that doesn't include the polygons](https://nicolas.kruchten.com/semiology_of_graphics/data/semiology_of_graphics.csv).)
+Here is what the resulting dataset looks like, when loaded from [a 55kb GeoJSON file](https://nicolas.kruchten.com/semiology_of_graphics/data/semiology_of_graphics.geojson) using `geopandas`. (Note: for anyone wanting to play with this data, there's also [a CSV that doesn't include the polygons](https://nicolas.kruchten.com/semiology_of_graphics/data/semiology_of_graphics.csv).) This dataset is in "wide form" i.e. one row per department with multiple data colums, so I've loaded it as `wide_df`.
 
-This dataset is in "wide form" i.e. one row per department with multiple data colums, so I've loaded it as `wide_df`.
+> Note: The page you're reading is actually the HTML export of an interactive [Jupyter](https://jupyter.org/) notebook, meaning that starting now you'll start to see code and its output interspersed with the prose. You can run this code yourself and play with the code in your browser for free by [launching the notebook on the Binder service](https://mybinder.org/v2/gh/nicolaskruchten/semiology_of_graphics/HEAD?filepath=Remaking%20Figures%20from%20Semiology%20of%20Graphics.ipynb).
 
 ```python
 import geopandas as gpd
@@ -74,7 +74,7 @@ long_df["percentage"] = 100* long_df.quantity / long_df.total
 display(long_df.head(5))
 ```
 
-Finally, we'll load Plotly Express and preconfigure some default values which we'll reuse throughout the various figures. Notably, we'll set some default colors and rendering orders for the `sector` and `type` variables.
+This is as good a place as any to load Plotly Express in the notebook and preconfigure some default values for reuse throughout the various figures below. Notably, we'll set some default colors and rendering orders for the `sector` and `type` variables.
 
 ```python
 import plotly.express as px
@@ -91,21 +91,32 @@ px.defaults.category_orders = dict(
 )
 ```
 
-## The Design Space
+## Exploring the Design Space
+
+The book includes a simplified decision-tree-like representation of the choices one must make when visualizing this dataset. Here's a slightly more in-depth version which drove some of my thinking in making the figures below:
 
 * **Data**: absolute quantities or percentages?
-* **Marks**: one per department or one per sector per department?
+* **Granularity**: one visual mark per department or one per sector per department?
+* **Mark types**: what type of visual marks will the figures include?
+  * **Charts**:
+    * **Bars**: fixed or variable width?
+    * **Points in abstract space**: 2-d cartesian or ternary coordinates?
+  * **Maps**:
+    * **Department polygons**: scaled by geography or data?
+    * **Points on maps**: one per department or on a regular grid?
 * **Color**: continuous or discrete?
 * **Arrangement**: one panel or multiple?
-* **Genre**: chart or map?
-  * **Chart**: what kind of mark?
-    * **Bar**: fixed or variable width?
-    * **Point**: 2-d cartesian or ternary coordinates?
-  * **Map**: what kind of mark?
-    * **Department polygons**: scaled by geography or data?
-    * **Points**: one per department or on a regular grid?
 
-The first figure we'll make is a simple faceted bar chart of the raw counts. This figure is interactive in that you can hover over any bar to see the details of the data it encodes, which goes some way towards mitigating the legibility issues of the tiny font used in the labels (a problem in the book also!). In the book all the bars were black, but here I've colored them using the convention I'll use throughout: green for agriculture, red for industry and blue for services.
+I've arranged the figures I made in roughly the same order as they appear in the book, broadly organized by mark type.
+
+
+### Bars
+
+The book begins by showing the various ways you can visualize the dataset using bar charts, starting with a simple horizontal bar chart of the absolute counts, faceted by sector, like the one below. This figure is *interactive* in that you can hover over any bar to see the details of the data it encodes, which goes some way towards mitigating the legibility issues of the tiny font used in the labels (a problem in the book also!)
+
+A note on color: the book uses color sparingly and only on certain pages, presumably for cost reasons. I'll mostly be consistently using a green/red/blue color scheme because it's visually a bit more interesting, and because color is free on computer screens. I also use color in places where the book uses value or crosshatching.
+
+This first figure is not all that much more helpful at understanding patterns in the data than the original table, other than giving a sense of the great disparity in magnitude between the biggest and smallest numbers: roughly two orders of magnitude.
 
 ```python
 fig = px.bar(long_df, x="quantity", y="department", color="sector", facet_col="sector", height=600)
@@ -114,7 +125,7 @@ fig.update_yaxes(tickfont_size=4, autorange="reversed")
 fig.show()
 ```
 
-Here's the same data in a stacked bar chart, which lets us more easily see the total population of each department by looking at the heights of the bar stacks:
+The book goes on to include a number of stacked bar charts like the one below, ordered or faceted in various ways. Here I've continued to order the departments by total population, which is more readily-apparent than in the figure above due to the stacking.
 
 ```python
 fig = px.bar(long_df, x=long_df.index, y="quantity", color="sector", hover_name="department")
@@ -123,7 +134,9 @@ fig.update_xaxes(tickfont_size=5, tickangle=-90, categoryorder="total descending
 fig.show()
 ```
 
-Here's the same data except each stack has been merged together into a single bar, now colored by the `type` column. Stacks with more blue than red and more red than green are now a blueish purple, for example.
+This next figure doesn't appear in the book as the book doesn't include much color. It's the same as the one above except each stack has been merged together into a single bar, now colored by the `type` column. Stacks with more blue (services) than red (industry) and more red than green (agriculture) are now a blueish purple, for example. I experimented with a continuous ternary color scale but I found the results too muddy to be attractive, and no more revealing of any patterns. I explored such continuous scales in my [application of ternary charts to election results](http://nicolas.kruchten.com/content/2014/01/mtlelection-ternary/). I should note that there's a nice-looking R package for continuous and discrete ternary color scales called [`{tricolore}`](https://github.com/jschoeley/tricolore).
+
+Looking at this chart, one can wonder if there's a relationship between department population and amount of agriculture: there's more green on the right of the chart.
 
 ```python
 fig = px.bar(wide_df, x=wide_df.index, y="total", color="type", hover_name="department",
@@ -133,7 +146,7 @@ fig.update_xaxes(tickfont_size=5, tickangle=-90, categoryorder="total descending
 fig.show()
 ```
 
-Going back to stacked bars, we can map the population of the department to the width of the stack instead of its height, so that each bar extends to 100%, allowing us to more directly compare percentages between stacks, while preserving a visual sense of how many people each stack represents:
+Going back to stacked bars, the book includes a chart like the one below, where the population of the department is mapped to the width of the stack instead of its height, so that each bar extends to 100%, allowing for a more direct comparison of percentages between stacks, while preserving a visual sense of how many people each stack represents. In both this chart and the ones above, the areas of the bars are proportional to the population.
 
 ```python
 fig = px.bar(long_df, x=long_df.index, y="percentage", hover_name="department", color="sector",
@@ -147,11 +160,17 @@ fig.update_layout(bargap=0, barnorm="percent", legend_orientation="h", legend_y=
 fig.show()
 ```
 
+The book segues from using bars to represent individual departments or sectors-within-departments to using bar marks in histograms. I'm skeptical of histograms like the one below which count Paris (pop 1.5M) as "1" as well as Lozere (pop 34k), but here it is nonetheless. This figure goes back to representing the sectors as facets, but the book also includes a single-panel version with the bars smoothed into lines.
+
 ```python
 fig = px.histogram(long_df, x="quantity", color="sector", facet_row="sector")
 fig.update_layout(showlegend=False)
 fig.show()
 ```
+
+### Lines
+
+Speaking of lines, the same page in the book that covers histograms cryptically covers "concentration curves", which are meant to allow you to estimate how evenly a sector's quantity is distributed over departments. The idea is that the closer a curve is to being a straight line, the more evenly-distributed a quantity is. This corresponds to having a more-uniform distribution in the histograms above. I've replicated one of these figures below to show that it's fairly straightforward to write this code with `pandas`, despite my ongoing skepticism about the usefulness of this concept. It's clear that industry and services are less evenly-distributed than agriculture, as is apparent by the right-hand outliers in the histograms above.
 
 ```python
 long_df["rank"] = long_df.groupby("sector").quantity.rank(method="first", ascending=False)
@@ -159,6 +178,7 @@ long_df["cum_pct"] = (91-long_df["rank"])/0.9
 long_df = long_df.sort_values("rank", ascending=False)
 q = long_df.groupby("sector").quantity
 long_df["cum_pct_q"] = 100*q.cumsum()/q.transform("sum")
+
 fig = px.line(long_df, x="cum_pct", y="cum_pct_q", color="sector", labels=dict(
                  cum_pct="Cumulative Percentage of Number of Departments",
                  cum_pct_q="Cumulative Percentage of Quantity"))
@@ -166,9 +186,11 @@ fig.update_layout(legend_x=0.01, legend_y=0.99)
 fig.show()
 ```
 
-Moving from bars to lines as a visual representation, here is a parallel coordinates chart where each department is one line that zigzags through its corresponding data points in 4 dimensions: the percentage of workers in each sector and the total population of the department. Lines are colored by the percentage of workers in industry in varying intensities of red, naturally. Try drag-selecting the dimensions to select/deselect lines!
+A more interesting figure in the book that uses lines is actually what we would now call a parallel coordinates chart, a name that was popularized in the 80s. The figure in the book is reproduced here, and visualizes each department as a single line that zigzags through three dimensions: the rank of each department by sector (agriculture – sector I – is repeated to clarify the pattern). 
 
 <a target="_blank" href="images/parcoords.png"><img src="images/parcoords.png" style="width: 300px;"></a>
+
+In the figure below I use slightly different dimensions: the *percentage* of workers in each sector and the total population of the department. Lines are colored by the percentage of workers in industry in varying intensities of red. Try drag-selecting the dimensions to select/deselect lines! You can see that broadly speaking, smaller departments do tend to be more agricultural.
 
 ```python
 fig = px.parallel_coordinates(wide_df, dimensions=["agriculture_pct", "industry_pct", "services_pct", "total"],
@@ -176,12 +198,20 @@ fig = px.parallel_coordinates(wide_df, dimensions=["agriculture_pct", "industry_
 fig.update_traces(dimensions=[dict(range=[0,75]),dict(range=[0,75]),dict(range=[0,75]), dict(range=[0,1700000])])
 fig.show()
 ```
+### Points
+
+After bars and lines the book moves on to using points as marks by making scatterplots. The next figure doesn't appear in the book, but it's a scatterplot of percentage vs the log of total population, faceted by sector. It shows that there is indeed a weak negative relationship between size and agriculture. Plotly scatterplots afford hovering, unlike Plotly parallel coordinates plots, so it's easier to identify the the high-industry/low-total-population deparment that shows up as the darkest line above as Belfort.
+
 ```python
 fig = px.scatter(long_df, x="total", y="percentage", color="sector", facet_col="sector",
                  hover_name="department", log_x=True)
 fig.update_layout(showlegend=False)
 fig.show()
 ```
+
+The book includes what we would now call a scatterplot matrix, or SPLOM: a figure that plots every variable against every other on logarithmic axes. I've reproduced it below, colored by type, as here each panel doesn't represent a single sector. I've also scaled the points by total population. This figure supports linked brushing, meaning that a drag-selection made in one panel is reflected in the others.
+
+The strong relationship between industry and services becomes very apparent in this chart.
 
 ```python
 fig = px.scatter_matrix(wide_df, dimensions=["industry", "services", "agriculture"], size="total",
@@ -194,18 +224,28 @@ fig.show()
 ```
 
 
+The last non-map chart in the book is a ternary chart: a single-panelled chart that displays all three sector percentage values simultaneously by exploiting the fact that the percentages add up to 100% for each sector (modulo rounding errors). The original in the book scales departments by total population and looks like this:
+
 <a target="_blank" href="images/ternary.png"><img src="images/ternary.png" style="width: 300px;"></a>
 
+My version below reuses the discrete color scale I introduced above, and here it's clear that each color belongs to its own sixth of the surface of the triangle.
+
 ```python
-fig = px.scatter_ternary(wide_df, a="agriculture", b="industry", c="services", size="total",
+fig = px.scatter_ternary(wide_df, a="agriculture_pct", b="industry_pct", c="services_pct", size="total",
                          color="type", opacity=1, hover_name="department")
 fig.update_layout(legend_xanchor="right", legend_x=0.99, legend_y=0.99)
-fig.update_ternaries(aaxis_ticks="outside", baxis_ticks="outside", caxis_ticks="outside")
+fig.update_ternaries(sum=100, aaxis_ticks="outside", baxis_ticks="outside", caxis_ticks="outside")
 fig.show()
 ```
 
 
+### Cartograms and Treemaps
+
+Among the first maps in this section of the book are cartograms: maps distorted such that the area of a given department is proportional to its population, say, while roughly maintaining the position of departments to each other. Here is one example from the book:
+
 <a target="_blank" href="images/cartogram.png"><img src="images/cartogram.png" style="width: 300px;"></a>
+
+Plotly Express doesn't have any automated facilities for cartograms, and in fact the book criticises them for their subjectivity and how hard it is to make them, so instead I'll show off Plotly's treemap functionality. Treemaps were popularized in the 1990s, and represent nested quantities by area. Here I've nested the departments inside their (modern-day) regional administrative units. The tenuous similarity to a cartogram is thus that departments in the same region are shown close to each other in this figure, although regions nearby in space are not necessarily rendered that way. I've sized the rectangles by total population and colored them here by percentage of services weighted by population, so hovering over a region's name (or the label "France") will give you the correct percentage at the higher level of aggregation. The bigger department rectangles generally appear darker than the smaller ones, although this is pattern is not as clear as in the percentage-vs-total faceted scatterplot above.
 
 ```python
 fig = px.treemap(wide_df, path=[px.Constant("France"), "region", "department"], values="total",
