@@ -25,15 +25,15 @@ I don't think I can reasonably reproduce the entire section at high resolution h
 The dataset is quite similar to one I spent a lot of time exploring through visualizations: the vote split between the top 3 candidates in a local Montreal mayoral election, which I visualized as a [dot map](http://nicolas.kruchten.com/content/2013/12/dot-map-of-2013-montreal-election-results/), [ternary charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-ternary/), [mosaic charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-early_voting/), [choropleth maps](http://nicolas.kruchten.com/content/2014/01/mtlelection-zoomable-map/) and [pies-on-maps](http://nicolas.kruchten.com/content/2015/08/election-pies/). When I read this book I was pleased to see every idea I'd had was represented and I was fascinated to see so many new ones, and I've been wanting to remake these graphics with modern tools ever since. I recently read the excellent new book [*Visualizing With Text* by Richard Brath](https://books.google.ca/books/about/Visualizing_with_Text.html?id=dAoHEAAAQBAJ&source=kp_book_description&redir_esc=y), which includes a number of text-based remakes of these same figures, which motivated me to actually carry out this project. I'm pleased that the visualization library I've been working on for the past couple of years, [Plotly Express](https://plotly.express), is now mature enough to let me do a decent job at many of these graphics with just a few lines of code.
 
 
-## An Intellectual Ancestor
+## An Intellectual Ancestor to Plotly Express
 
 Before getting into the remakes, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the one highlighted below, which the book explains how to interpret or generate.
 
 <br />
 <table><tr>
-    <td><img src="images/glyphs.png" alt="glyphs" style="height: 300px;"/></td>
-    <td><img src="images/glyphs2.png" alt="glyphs" style="height: 300px;"/></td>
-    <td><img src="images/glyphs3.png" alt="glyphs" style="height: 300px;"/></td>
+    <td><a href="images/glyphs.png"><img src="images/glyphs.png" alt="glyphs" style="height: 300px;"/></a></td>
+    <td><a href="images/glyphs2.png"><img src="images/glyphs2.png" alt="glyphs" style="height: 300px;"/></a></td>
+    <td><a href="images/glyphs3.png"><img src="images/glyphs3.png" alt="glyphs" style="height: 300px;"/></a></td>
 </tr></table>
 <br />
 
@@ -52,13 +52,13 @@ The first step to remaking these figures with Plotly Express was to get the data
 4. I simplified the geometry of the polygons to reduce the file size and even out some of the inaccuracies I introduced when I merged the Paris-region departments. The simplified polygons have approximately the same level of detail as the maps in the book, which are only rendered a few inches across anyway.
 5. I added two new columns which I explain in the text below: `region`, which is the modern-day administrative division that regroups multiple departments, and `type`, which indicates the relative rank of the three economic sectors in a given department: type `A>S>I` means there are more people working in agriculture than in services, and more in services than industry, etc.
 
-Here is what the resulting dataset looks like, when loaded from a 55kb GeoJSON file (available here) using `geopandas`. (Note: for anyone wanting to play with this data, there's also a CSV that doesn't include the polygons.)
+Here is what the resulting dataset looks like, when loaded from [a 55kb GeoJSON file](https://nicolas.kruchten.com/semiology_of_graphics/data/semiology_of_graphics.geojson) using `geopandas`. (Note: for anyone wanting to play with this data, there's also [a CSV that doesn't include the polygons](https://nicolas.kruchten.com/semiology_of_graphics/data/semiology_of_graphics.csv).)
 
 This dataset is in "wide form" i.e. one row per department with multiple data colums, so I've loaded it as `wide_df`.
 
 ```python
 import geopandas as gpd
-wide_df = gpd.read_file("semiology_of_graphics.geojson").set_index("code")
+wide_df = gpd.read_file("data/semiology_of_graphics.geojson").set_index("code")
 display(wide_df.head(5))
 ```
 
@@ -91,7 +91,19 @@ px.defaults.category_orders = dict(
 )
 ```
 
-## The Remakes
+## The Design Space
+
+* **Data**: absolute quantities or percentages?
+* **Marks**: one per department or one per sector per department?
+* **Color**: continuous or discrete?
+* **Arrangement**: one panel or multiple?
+* **Genre**: chart or map?
+  * **Chart**: what kind of mark?
+    * **Bar**: fixed or variable width?
+    * **Point**: 2-d cartesian or ternary coordinates?
+  * **Map**: what kind of mark?
+    * **Department polygons**: scaled by geography or data?
+    * **Points**: one per department or on a regular grid?
 
 The first figure we'll make is a simple faceted bar chart of the raw counts. This figure is interactive in that you can hover over any bar to see the details of the data it encodes, which goes some way towards mitigating the legibility issues of the tiny font used in the labels (a problem in the book also!). In the book all the bars were black, but here I've colored them using the convention I'll use throughout: green for agriculture, red for industry and blue for services.
 
@@ -99,7 +111,7 @@ The first figure we'll make is a simple faceted bar chart of the raw counts. Thi
 fig = px.bar(long_df, x="quantity", y="department", color="sector", facet_col="sector", height=600)
 fig.update_layout(bargap=0, showlegend=False)
 fig.update_yaxes(tickfont_size=4, autorange="reversed")
-fig.show("notebook")
+fig.show()
 ```
 
 Here's the same data in a stacked bar chart, which lets us more easily see the total population of each department by looking at the heights of the bar stacks:
@@ -135,7 +147,28 @@ fig.update_layout(bargap=0, barnorm="percent", legend_orientation="h", legend_y=
 fig.show()
 ```
 
+```python
+fig = px.histogram(long_df, x="quantity", color="sector", facet_row="sector")
+fig.update_layout(showlegend=False)
+fig.show()
+```
+
+```python
+long_df["rank"] = long_df.groupby("sector").quantity.rank(method="first", ascending=False)
+long_df["cum_pct"] = (91-long_df["rank"])/0.9
+long_df = long_df.sort_values("rank", ascending=False)
+q = long_df.groupby("sector").quantity
+long_df["cum_pct_q"] = 100*q.cumsum()/q.transform("sum")
+fig = px.line(long_df, x="cum_pct", y="cum_pct_q", color="sector", labels=dict(
+                 cum_pct="Cumulative Percentage of Number of Departments",
+                 cum_pct_q="Cumulative Percentage of Quantity"))
+fig.update_layout(legend_x=0.01, legend_y=0.99)
+fig.show()
+```
+
 Moving from bars to lines as a visual representation, here is a parallel coordinates chart where each department is one line that zigzags through its corresponding data points in 4 dimensions: the percentage of workers in each sector and the total population of the department. Lines are colored by the percentage of workers in industry in varying intensities of red, naturally. Try drag-selecting the dimensions to select/deselect lines!
+
+<a href="images/parcoords.png"><img src="images/parcoords.png" style="width: 300px;"></a>
 
 ```python
 fig = px.parallel_coordinates(wide_df, dimensions=["agriculture_pct", "industry_pct", "services_pct", "total"],
@@ -160,6 +193,9 @@ for i in range(1,4):
 fig.show()
 ```
 
+
+<a href="images/ternary.png"><img src="images/ternary.png" style="width: 300px;"></a>
+
 ```python
 fig = px.scatter_ternary(wide_df, a="agriculture", b="industry", c="services", size="total",
                          color="type", opacity=1, hover_name="department")
@@ -168,11 +204,17 @@ fig.update_ternaries(aaxis_ticks="outside", baxis_ticks="outside", caxis_ticks="
 fig.show()
 ```
 
+
+<a href="images/cartogram.png"><img src="images/cartogram.png" style="width: 300px;"></a>
+
 ```python
 fig = px.treemap(wide_df, path=[px.Constant("France"), "region", "department"], values="total",
                  color="services_pct", color_continuous_scale="blues", range_color=[0,75])
 fig.show()
 ```
+
+
+<a href="images/texture_map.png"><img src="images/texture_map.png" style="width: 300px;"></a>
 
 ```python
 fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
@@ -181,6 +223,8 @@ fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
                     fitbounds="geojson", basemap_visible=False, projection="mercator")
 fig.show(config=dict(scrollZoom=False))
 ```
+
+<a href="images/value.png"><img src="images/value.png" style="width: 300px;"></a>
 
 ```python
 fig = px.choropleth(long_df, geojson=long_df.geometry, locations=long_df.index,
@@ -224,7 +268,7 @@ fig.show(config=dict(scrollZoom=False))
 ```
 
 ```python
-points_df = gpd.read_file("semiology_of_graphics_points.geojson").melt(
+points_df = gpd.read_file("data/semiology_of_graphics_points.geojson").melt(
     id_vars=["code", "geometry", "department"],
     value_vars=["agriculture", "industry", "services"],
     var_name="sector", value_name="quantity"
@@ -244,6 +288,8 @@ fig.add_trace(basepolygons, row="all", col="all")
 fig.show(config=dict(scrollZoom=False))
 ```
 
+<a href="images/stipple_map.png"><img src="images/stipple_map.png" style="width: 300px;"></a>
+
 ```python
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
                      size="quantity", color="sector",
@@ -261,6 +307,18 @@ for i, t in enumerate(fig.data):
 fig.add_trace(basepolygons, row="all", col="all")
 fig.show(config=dict(scrollZoom=False))
 ```
+
+<!-- #region -->
+### Not Remade
+
+
+<br />
+<table><tr>
+    <td><a href="images/glyphs.png"><img src="images/chartmaps.png" alt="glyphs" style="width: 300px;"/></a></td>
+    <td><a href="images/glyphs2.png"><img src="images/stripes.png" alt="glyphs" style="width: 300px;"/></a></td>
+</tr></table>
+<br />
+<!-- #endregion -->
 
 now what?
 
