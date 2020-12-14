@@ -22,5 +22,6 @@ SOFTWARE.
 
 ---
 
-Note: this license and copyright does not apply to the images in this repo, which
-are copyright their original owners and reproduced here under fair use principles
+Note: this license and copyright does not apply to the images or data files in
+this repository, which are copyright their original owners and reproduced here
+under fair use principles.
