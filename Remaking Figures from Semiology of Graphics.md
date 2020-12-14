@@ -16,18 +16,20 @@ jupyter:
 # Remaking Figures from <br>Bertin's *Semiology of Graphics*
 <p style="text-align: center">by <a target="_blank" href="https://nicolas.kruchten.com/">Nicolas Kruchten</a></p>
 
-One of my favourite books about data visualization is [*Semiology of Graphics: Diagrams, Networks, Maps* by Jacques Bertin](https://books.google.ca/books/about/Semiology_of_Graphics.html?id=X5caQwAACAAJ&source=kp_book_description&redir_esc=y), from 1967. It's a dense, 450-page tome which is now considered a classic in the development of the field. Michael Friendly, in his [Brief History of Data Visualization](http://datavis.ca/papers/hbook.pdf), identifies it as one of three key factors in the late-20th century renaissance in data visualization (following a golden age in the 19th century and a dark age in the early 20th). One of my favourite parts of the book is a 40-page section called "The Graphic Problem", which enumerates by example 100 different visualizations of the same compact dataset, to outline what we would now call the design space of visualizations, and to forcefully make the point that the choice of which visualization to use for a given dataset is far from obvious. The dataset, which is printed in a small table at the beginning of the section, is quite simple on its face: the number of people working in agriculture, industry and services for each of 90 administrative divisions in France in 1954 (there are four other, derived columns: the sum of the first three, and each of the first three divided by the sum).
+One of my favourite books about data visualization is [*Semiology of Graphics: Diagrams, Networks, Maps* by Jacques Bertin](https://books.google.ca/books/about/Semiology_of_Graphics.html?id=X5caQwAACAAJ&source=kp_book_description&redir_esc=y), from 1967. It's a dense, 450-page tome which is now considered a classic in the development of the field. Michael Friendly, in his [Brief History of Data Visualization](http://datavis.ca/papers/hbook.pdf), identifies it as one of three key factors in the late-20th century renaissance in data visualization (following a golden age in the 19th century and a dark age in the early 20th). 
+
+One of my favourite parts of the book is a 40-page section called "The Graphic Problem", which enumerates by example 100 different visualizations of the same compact dataset, to outline what we would now call the design space of visualizations, and to forcefully make the point that the choice of which visualization to use for a given dataset is far from obvious, and that the visualization used must match the questions it should be used to answer. The dataset, which is printed in a small table at the beginning of the section, is quite simple on its face: the number of people working in agriculture, industry and services for each of 90 administrative divisions in France in 1954 (there are four other, derived columns: the sum of the first three, and each of the first three divided by the sum).
 
 I don't think I can reasonably reproduce the entire section at high resolution here, but I'm including an overview of 32 of those pages, which should give a sense of the breadth of visual forms covered. There are bar charts (faceted, stacked, reordered, variable-width), histograms, concentration curves, scatterplots and scatterplot matrices, a parallel-coordinates plot, some ternary plots, and that's before we even get to maps. There are cartograms and graduated-symbol maps and contour maps and dot maps and choropleths and maps with pies and bars on them, and some stippled and striped maps that I don't believe have common names, as I've only ever seen them in this book!
 
 <a target="_blank" href="images/spread.png"><img src="images/spread.png"></a>
 
-The dataset is quite similar to one I spent a lot of time exploring through visualizations: the vote split between the top 3 candidates in a local Montreal mayoral election, which I visualized as a [dot map](http://nicolas.kruchten.com/content/2013/12/dot-map-of-2013-montreal-election-results/), [ternary charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-ternary/), [mosaic charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-early_voting/), [choropleth maps](http://nicolas.kruchten.com/content/2014/01/mtlelection-zoomable-map/) and [pies-on-maps](http://nicolas.kruchten.com/content/2015/08/election-pies/). When I read this book I was pleased to see every idea I'd had was represented and I was fascinated to see so many new ones, and I've been wanting to remake these graphics with modern tools ever since. I recently read the excellent new book [*Visualizing With Text* by Richard Brath](https://books.google.ca/books/about/Visualizing_with_Text.html?id=dAoHEAAAQBAJ&source=kp_book_description&redir_esc=y), which includes a number of text-based remakes of these same figures, which motivated me to actually carry out this project. I'm pleased that the visualization library I've been working on for the past couple of years, [Plotly Express](https://plotly.express), is now mature enough to let me do a decent job at many of these graphics with just a few lines of code.
+The dataset is quite similar to one I spent a lot of time exploring through visualizations: the vote split between the top 3 candidates in a local Montreal mayoral election, which I visualized as a [dot map](http://nicolas.kruchten.com/content/2013/12/dot-map-of-2013-montreal-election-results/), [ternary charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-ternary/), [mosaic charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-early_voting/), [choropleth maps](http://nicolas.kruchten.com/content/2014/01/mtlelection-zoomable-map/) and [pies-on-maps](http://nicolas.kruchten.com/content/2015/08/election-pies/). When I read this book I was pleased to see every idea I'd had was represented and I was fascinated to see so many new ones, and I've been wanting to remake these graphics with modern tools ever since. I recently read the excellent new book [*Visualizing With Text* by Richard Brath](https://books.google.ca/books/about/Visualizing_with_Text.html?id=dAoHEAAAQBAJ&source=kp_book_description&redir_esc=y), which includes a number of text-based remakes of these same figures, which motivated me to actually carry out this project. I'm pleased that the visualization library I've been working on for the past couple of years, [Plotly Express](https://plotly.express), is now mature enough to let me do a decent job at many of these figures with just a few lines of code.
 
 
 ## An Intellectual Ancestor to Plotly Express
 
-Before getting into the figures, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the ones highlighted below in pink, which the book explains how to interpret or generate.
+Before getting into the figures and code, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the ones highlighted below in pink, which the book explains how to interpret or generate.
 
 <br />
 <table><tr>
@@ -42,7 +44,7 @@ Each glyph is basically a very compact graphical specification/explanation of th
 What I find fascinating about these little glyphs is that they are in a way the intellectual ancestors of the code blocks you'll find below, which are used to generate the interactive figures. I don't know if Bertin would sketch these glyphs first, then make the charts, or if he drew them on afterwards, but with modern tools like Plotly Express, we can write just a few lines of code which express the same ideas as these glyphs (in rather less ambiguous form) and the figures just appear! For those who know how to read the code, it also provides a clear specification of the figure. This is possible because the design of these libraries was informed by a line of thinking which originated from this book, i.e. the formalized semiological notion idea that visualization involves a sign-system wherein visual variables (signifiers) are mapped onto data variables (signifieds). The little glyphs I mentioned above were part of the explanation of this mapping. This line of thinking and its relationship to visualization software was further elaborated in a book called [*The Grammar of Graphics* by Leland Wilkinson](https://books.google.ca/books/about/The_Grammar_of_Graphics.html?id=ZiwLCAAAQBAJ&source=kp_book_description&redir_esc=y) in the 90s, and then embedded into multiple subsequent generations of visualization software since, including Plotly Express.
 
 
-## Data & Prep
+## Data and Setup
 
 The first step to remaking these figures with Plotly Express was to get the data into a Python-friendly format. The dataset nominally contains only a few columns of numbers, but in order to make maps we actually need some geographic data as well! This is sort of implicit in the book, but when working with code, everything must be made explicit. This was a little bit of a challenge since french administrative divisions have evolved a little bit since 1967, when the book was published, and the data was from 1954. I found [a set of polygons for the boundern boundaries of french departments](https://github.com/gregoiredavid/france-geojson) and modified them as follows, to match the data in the book:
 
@@ -74,7 +76,7 @@ long_df["percentage"] = 100* long_df.quantity / long_df.total
 display(long_df.head(5))
 ```
 
-This is as good a place as any to load Plotly Express in the notebook and preconfigure some default values for reuse throughout the various figures below. Notably, we'll set some default colors and rendering orders for the `sector` and `type` variables.
+This is as good a place as any to load Plotly Express into the notebook and preconfigure some default values for reuse throughout the various figures below. Notably, we'll set some default colors and rendering orders for the `sector` and `type` variables (see inline explanations for the color scheme).
 
 ```python
 import plotly.express as px
@@ -250,6 +252,7 @@ Plotly Express doesn't have any automated facilities for cartograms, and in fact
 ```python
 fig = px.treemap(wide_df, path=[px.Constant("France"), "region", "department"], values="total",
                  color="services_pct", color_continuous_scale="blues", range_color=[0,75])
+fig.update_layout(margin=dict(t=40, b=0, r=0, l=0))
 fig.show()
 ```
 
@@ -267,6 +270,7 @@ fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
                     color="type", hover_name="department",
                     hover_data=["agriculture_pct", "industry_pct", "services_pct"],
                     fitbounds="geojson", basemap_visible=False, projection="mercator")
+fig.update_layout(margin=dict(t=40, b=0, r=0, l=0))
 fig.show(config=dict(scrollZoom=False))
 ```
 
@@ -279,14 +283,12 @@ I've remade this figure using continuous color scales, which reveal a bit more o
 ```python
 fig = px.choropleth(long_df, geojson=long_df.geometry, locations=long_df.index,
                     color="percentage", facet_col="sector", hover_name="department",
-                    fitbounds="geojson", basemap_visible=False, projection="mercator",
-                    height=400
-                   )
+                    fitbounds="geojson", basemap_visible=False, projection="mercator")
 
 for i, scale in enumerate(["greens", "reds", "blues"]):
     fig.update_traces(selector=i, coloraxis=None, zmin=0, zmax=75, colorscale=scale,
                       colorbar=dict(x=1.1-i*0.015, thickness=10, showticklabels=i==0, len=0.6))
-
+fig.update_layout(height=400, margin=dict(t=40, b=0, r=0, l=0))
 fig.show(config=dict(scrollZoom=False))
 ```
 
@@ -306,6 +308,7 @@ fig = px.scatter_geo(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
                      hover_name="department", hover_data=["agriculture_pct", "industry_pct", "services_pct"],
                      fitbounds="geojson", basemap_visible=False, projection="mercator")
 fig.add_trace(basepolygons)
+fig.update_layout(margin=dict(t=40, b=0, r=0, l=0))
 fig.show(config=dict(scrollZoom=False))
 ```
 
@@ -321,7 +324,7 @@ fig = px.scatter_geo(long_df, geojson=long_df.geometry, locations=long_df.index,
                     height=400)
 
 fig.add_trace(basepolygons, col="all", row="all")
-fig.update_layout(showlegend=False)
+fig.update_layout(showlegend=False, height=400, margin=dict(t=40, b=0, r=0, l=0))
 fig.show(config=dict(scrollZoom=False))
 ```
 
@@ -342,12 +345,12 @@ points_df["label"] = points_df["code"].apply(lambda d: d if d in ["P", "75"] els
 
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
                      size="quantity", facet_col="sector", size_max=30,  opacity=.8,
-                     color="sector", over_name="department", text="label", 
+                     color="sector", hover_name="department", text="label", 
                      hover_data=dict(label=False), fitbounds="geojson", 
                      basemap_visible=False, projection="mercator")
 
 fig.update_traces(textposition="bottom center")
-fig.update_layout(showlegend=False)
+fig.update_layout(showlegend=False, height=400, margin=dict(t=40, b=0, r=0, l=0))
 fig.add_trace(basepolygons, row="all", col="all")
 fig.show(config=dict(scrollZoom=False))
 ```
@@ -375,6 +378,7 @@ for i, t in enumerate(fig.data):
     t.lon = t.lon-0.11*(i-1)
 
 fig.add_trace(basepolygons, row="all", col="all")
+fig.update_layout(margin=dict(t=40, b=0, r=0, l=0))
 fig.show(config=dict(scrollZoom=False))
 ```
 
@@ -389,7 +393,7 @@ As I wrote at the top, this section of *Semiology of Graphics* includes around 1
 </tr></table>
 <br />
 
-I chose to skip some figures for brevity, and some because Plotly Express doesn't support making such figures without resorting to dozens of lines of code. I've provided the data files I used in [the Github repository for this project](https://github.com/nicolaskruchten/semiology_of_graphics), however, so if someone is excited about remaking these figures with their favourite vis tools, I'd be thrilled to see more remakes!
+I chose to skip some figures for brevity, and some because Plotly Express doesn't support making such figures without resorting to dozens of lines of code, which would really push the "A few lines of Plotly Express code are like the explanatory glyph" analogy I made at the top to its breaking point! I've provided the data files I used in [the Github repository for this project](https://github.com/nicolaskruchten/semiology_of_graphics), however, so if someone is excited about remaking these figures with their favourite vis tools, I'd be thrilled to see more remakes!
 
 
 ## Conclusion
@@ -398,8 +402,6 @@ This was a fun project that let me push the bounds of how easily/tersely/compreh
 
 Some links for further exploration:
 * [My personal website](https://nicolas.kruchten.com/)
-* [Plotly Express
-
-```python
-
-```
+* [Plotly Express](https://plotly.express/)
+* [The data files](https://github.com/nicolaskruchten/semiology_of_graphics/tree/master/data)
+* [This notebook on Binder](https://mybinder.org/v2/gh/nicolaskruchten/semiology_of_graphics/HEAD?filepath=Remaking%20Figures%20from%20Semiology%20of%20Graphics.ipynb)
