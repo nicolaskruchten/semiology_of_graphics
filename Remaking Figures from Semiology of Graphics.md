@@ -200,7 +200,7 @@ fig.show()
 ```
 ### Points
 
-After bars and lines the book moves on to using points as marks by making scatterplots. The next figure doesn't appear in the book, but it's a scatterplot of percentage vs the log of total population, faceted by sector. It shows that there is indeed a weak negative relationship between size and agriculture. Plotly scatterplots afford hovering, unlike Plotly parallel coordinates plots, so it's easier to identify the the high-industry/low-total-population deparment that shows up as the darkest line above as Belfort.
+After bars and lines the book moves on to using points as marks by making scatterplots. The next figure doesn't appear in the book, but it's a scatterplot of percentage vs the log of total population, faceted by sector. It shows that there is indeed a weak negative relationship between size and agriculture. Plotly Express' scatterplots afford hovering, unlike its parallel coordinates plots, so it's easier to identify the the high-industry/low-total-population deparment that shows up as the darkest line above as Belfort.
 
 ```python
 fig = px.scatter(long_df, x="total", y="percentage", color="sector", facet_col="sector",
@@ -241,11 +241,11 @@ fig.show()
 
 ### Cartograms and Treemaps
 
-Among the first maps in this section of the book are cartograms: maps distorted such that the area of a given department is proportional to its population, say, while roughly maintaining the position of departments to each other. Here is one example from the book:
+After dimissing "chartmaps" (see below under "not remade") the book touches on cartograms: maps distorted such that the area of a given department is proportional to its population, say, while roughly maintaining the position of departments to each other. Here is one example from the book:
 
 <a target="_blank" href="images/cartogram.png"><img src="images/cartogram.png" style="width: 300px;"></a>
 
-Plotly Express doesn't have any automated facilities for cartograms, and in fact the book criticises them for their subjectivity and how hard it is to make them, so instead I'll show off Plotly's treemap functionality. Treemaps were popularized in the 1990s, and represent nested quantities by area. Here I've nested the departments inside their (modern-day) regional administrative units. The tenuous similarity to a cartogram is thus that departments in the same region are shown close to each other in this figure, although regions nearby in space are not necessarily rendered that way. I've sized the rectangles by total population and colored them here by percentage of services weighted by population, so hovering over a region's name (or the label "France") will give you the correct percentage at the higher level of aggregation. The bigger department rectangles generally appear darker than the smaller ones, although this is pattern is not as clear as in the percentage-vs-total faceted scatterplot above.
+Plotly Express doesn't have any automated facilities for cartograms, and in fact the book criticises them for their subjectivity and how hard it is to make them, so instead I'll show off Plotly Express' treemap functionality. Treemaps were popularized in the 1990s, and represent nested quantities by area. Here I've nested the departments inside their (modern-day) regional administrative units. The tenuous similarity to a cartogram is thus that departments in the same region are shown close to each other in this figure, although regions nearby in space are not necessarily rendered that way. I've sized the rectangles by total population and colored them here by percentage of services weighted by population, so hovering over a region's name (or the label "France") will give you the correct percentage at the higher level of aggregation. The bigger department rectangles generally appear darker than the smaller ones, although this is pattern is not as clear as in the percentage-vs-total faceted scatterplot above.
 
 ```python
 fig = px.treemap(wide_df, path=[px.Constant("France"), "region", "department"], values="total",
@@ -254,7 +254,13 @@ fig.show()
 ```
 
 
+## Department Polygons
+
+The book includes a number of maps where the department polygons are shaded or textured to indicate their composition. My favourite example is the one below, which overlays three separate types of texture and is not possible to reproduce with Plotly Express at the moment (or, to be honest, likely ever!):
+
 <a target="_blank" href="images/texture_map.png"><img src="images/texture_map.png" style="width: 300px;"></a>
+
+In lieu of overlaid textures, here I've made a simple categorical choropleth where each department is colored by its `type`, which finally reveals some of the geographic pattern behind these types although, as Bertin points out, this map alone leaves out the actual distribution of population.
 
 ```python
 fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
@@ -264,7 +270,11 @@ fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
 fig.show(config=dict(scrollZoom=False))
 ```
 
+In lieu of color, the book includes some complicated shading schemes in faceted maps, such as the one below:
+
 <a target="_blank" href="images/value.png"><img src="images/value.png" style="width: 300px;"></a>
+
+I've remade this figure using continuous color scales, which reveal a bit more of the geographic pattern than the single-panel figure above, at the cognitive cost of having to scan across the figures to understand the relationship between the three variables, and still leaves out the total-population component.
 
 ```python
 fig = px.choropleth(long_df, geojson=long_df.geometry, locations=long_df.index,
@@ -279,6 +289,10 @@ for i, scale in enumerate(["greens", "reds", "blues"]):
 
 fig.show(config=dict(scrollZoom=False))
 ```
+
+### Points on Maps
+
+The book address the problem of showing the total population by moving on to points on maps. Here is a map with one point per department, colored by type and scaled by total population. The overwhelming density of the Paris region is unsatisfyingly dealt with by overlapping the points.
 
 ```python
 basepolygons = (
@@ -295,6 +309,10 @@ fig.add_trace(basepolygons)
 fig.show(config=dict(scrollZoom=False))
 ```
 
+The book displays the figure above with all-black points, alongside the the three panels below which are broken out by sector, so as to show more completely the overall distribution of population and how it breaks out by sector.
+
+The primary critique of this approach in the book is that even though french departments are roughly evenly-sized, it's hard to directly perceive population *densities* in these figures. This point is addressed in the next figures.
+
 ```python
 fig = px.scatter_geo(long_df, geojson=long_df.geometry, locations=long_df.index,
                      size="quantity", facet_col="sector", color="sector",
@@ -307,6 +325,12 @@ fig.update_layout(showlegend=False)
 fig.show(config=dict(scrollZoom=False))
 ```
 
+### Regularly-spaced Points on Maps
+
+To reveal population densities, Bertin proposes to use points not one-per-department, but on a regular grid (dividing the departmental quantities among the points that lie within departmental boundaries).
+
+I've separately-computed this grid of points and stored it in its [own GeoJSON file](data/semiology_of_graphics_points.geojson). Some special treatment for the Paris (P) and Seine (75) regions was necessary as those departments are simultaneously so small that the grid pattern didn't place any dots there, and so populous that their points overwhelm their surroundings. In the figures below I deal with the problem of the density of the Paris region in the same way as some of the maps in the book, by moving the corresponding points northeast, somewhere floating over Belgium. 
+
 ```python
 points_df = gpd.read_file("data/semiology_of_graphics_points.geojson").melt(
     id_vars=["code", "geometry", "department"],
@@ -318,9 +342,9 @@ points_df["label"] = points_df["code"].apply(lambda d: d if d in ["P", "75"] els
 
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
                      size="quantity", facet_col="sector", size_max=30,  opacity=.8,
-                     color="sector",
-                     hover_name="department", text="label", hover_data=dict(label=False),
-                     fitbounds="geojson", basemap_visible=False, projection="mercator")
+                     color="sector", over_name="department", text="label", 
+                     hover_data=dict(label=False), fitbounds="geojson", 
+                     basemap_visible=False, projection="mercator")
 
 fig.update_traces(textposition="bottom center")
 fig.update_layout(showlegend=False)
@@ -328,14 +352,20 @@ fig.add_trace(basepolygons, row="all", col="all")
 fig.show(config=dict(scrollZoom=False))
 ```
 
+Finally, I remake one of the maps I find the most striking. The figure above simultaneously displays absolute populations per sector and densities, but forces the viewer to scan back and forth to build a sense of the relative importance of one sector vs another in a particular area. This final map addresses this problem by overlaying the three panels above, with a slight offset. 
+
+The corresponding map from the book uses a unique blue/magenta/black color scheme, and is a bit more attractive than mine as it uses a triangular grid rather than a square one.
+
+<br />
 <a target="_blank" href="images/stipple_map.png"><img src="images/stipple_map.png" style="width: 300px;"></a>
+
+<br />
+Although this final map is very busy and a bit hard to look at, I actually think it makes it easier to simultaneously understand all the patterns than to flick my eyes back and forth across the three panels above. I'm not sure I would recommend it for general audiences or for other datasets though, as it probably doesn't scale very well to larger areas or more data series etc!
 
 ```python
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
-                     size="quantity", color="sector",
-                     size_max=25, opacity=0.9,
-                     hover_name="department",
-                     hover_data=dict(label=False),
+                     size="quantity", color="sector", size_max=25, opacity=0.9,
+                     hover_name="department", hover_data=dict(label=False),
                      fitbounds="geojson", basemap_visible=False, projection="mercator")
 fig.update_traces(marker_line_width=0.5)
 fig.data = fig.data[::-1]
@@ -348,9 +378,9 @@ fig.add_trace(basepolygons, row="all", col="all")
 fig.show(config=dict(scrollZoom=False))
 ```
 
-<!-- #region -->
 ### Not Remade
 
+As I wrote at the top, this section of *Semiology of Graphics* includes around 100 figures, and I've only made 17, so I definitely skipped many of them. There's quite a bit of repetition in the book (with mostly negative commentary along the lines of "this is not a very efficient figure for answering any particular question"): stacked bar charts with different orderings, a number of maps with tiny numbers written directly in the polygons, maps repeated with absolute quantities and then percentages, as well as some very strange-looking gems like the ones below:
 
 <br />
 <table><tr>
@@ -358,15 +388,18 @@ fig.show(config=dict(scrollZoom=False))
     <td><a target="_blank" href="images/glyphs2.png"><img src="images/stripes.png" alt="glyphs" style="width: 300px;"/></a></td>
 </tr></table>
 <br />
-<!-- #endregion -->
 
-now what?
+I chose to skip some figures for brevity, and some because Plotly Express doesn't support making such figures without resorting to dozens of lines of code. I've provided the data files I used in [the Github repository for this project](https://github.com/nicolaskruchten/semiology_of_graphics), however, so if someone is excited about remaking these figures with their favourite vis tools, I'd be thrilled to see more remakes!
 
-links to plotly
-links to my website
-links to other related things
 
-also requirements.txt
-link to binder to run this yourself
+## Conclusion
 
-encouragement to remake things like the cool stripey one or overlaid textures
+This was a fun project that let me push the bounds of how easily/tersely/comprehensibly [Plotly Express](https://plotly.express/) could be used to remake figures from one of my favourite books. I'm broadly satisfied with the results, both in terms of the figures themselves and the amount of code required to produce them and hopefully others can find something they like in this oddball passion project: either learning about a great book, thinking about alternative ways to explore a design space, or just cribbing some Plotly Express patterns.
+
+Some links for further exploration:
+* [My personal website](https://nicolas.kruchten.com/)
+* [Plotly Express
+
+```python
+
+```
