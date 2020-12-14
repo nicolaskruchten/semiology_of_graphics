@@ -16,28 +16,28 @@ jupyter:
 # Remaking Figures from <br>Bertin's *Semiology of Graphics*
 <p style="text-align: center">by <a href="https://nicolas.kruchten.com/">Nicolas Kruchten</a></p>
 
-One of my favourite books about data visualization is [*Semiology of Graphics: Diagrams, Networks, Maps* by Jacques Bertin](https://books.google.ca/books/about/Semiology_of_Graphics.html?id=X5caQwAACAAJ&source=kp_book_description&redir_esc=y), from 1967. It's a dense, 450-page tome which is now considered a classic in the development of the field. Michael Friendly, in his [Brief History of Data Visualization](http://datavis.ca/papers/hbook.pdf), identifies it as one of three key factors in the late-20th century renaissance in data visualization (following a golden age in the 19th century and a dark age in the early 20th). One of my favourite parts of the book is a 40-page section called "The Graphic Problem", which enumerates by example 100 different visualizations of the same compact dataset, to outline what we would now call the design space of visualizations, and to forcefully make the point that the choice of which visualization to use for a given dataset is far from obvious. The dataset, which is printed in a small table at the beginning of the section, is quite simple on its face: the number of people working in agriculture, industry and services for each of 90 administrative divisions in France in 1954 (there are four other, derived columns: the sum of the first three, and each of the first three divided by the sum). 
+One of my favourite books about data visualization is [*Semiology of Graphics: Diagrams, Networks, Maps* by Jacques Bertin](https://books.google.ca/books/about/Semiology_of_Graphics.html?id=X5caQwAACAAJ&source=kp_book_description&redir_esc=y), from 1967. It's a dense, 450-page tome which is now considered a classic in the development of the field. Michael Friendly, in his [Brief History of Data Visualization](http://datavis.ca/papers/hbook.pdf), identifies it as one of three key factors in the late-20th century renaissance in data visualization (following a golden age in the 19th century and a dark age in the early 20th). One of my favourite parts of the book is a 40-page section called "The Graphic Problem", which enumerates by example 100 different visualizations of the same compact dataset, to outline what we would now call the design space of visualizations, and to forcefully make the point that the choice of which visualization to use for a given dataset is far from obvious. The dataset, which is printed in a small table at the beginning of the section, is quite simple on its face: the number of people working in agriculture, industry and services for each of 90 administrative divisions in France in 1954 (there are four other, derived columns: the sum of the first three, and each of the first three divided by the sum).
 
 I don't think I can reasonably reproduce the entire section at high resolution here, but I'm including an overview of 32 of those pages, which should give a sense of the breadth of visual forms covered. There are bar charts (faceted, stacked, reordered, variable-width), scatterplots and scatterplot matrices, a parallel-coordinates plot, some ternary plots, and that's before we even get to maps. There are cartograms and dot maps and choropleths and maps with pies and bars on them, and some stippled and striped maps that I don't believe have distinct names, as I've only ever seen them in this book!
 
-![spread](spread.png)
+[![spread](images/spread.png)](images/spread.png)
 
 The dataset is quite similar to one I spent a lot of time exploring through visualizations: the vote split between the top 3 candidates in a local Montreal mayoral election, which I visualized as a [dot map](http://nicolas.kruchten.com/content/2013/12/dot-map-of-2013-montreal-election-results/), [ternary charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-ternary/), [mosaic charts](http://nicolas.kruchten.com/content/2014/01/mtlelection-early_voting/), [choropleth maps](http://nicolas.kruchten.com/content/2014/01/mtlelection-zoomable-map/) and [pies-on-maps](http://nicolas.kruchten.com/content/2015/08/election-pies/). When I read this book I was pleased to see every idea I'd had was represented and I was fascinated to see so many new ones, and I've been wanting to remake these graphics with modern tools ever since. I recently read the excellent new book [*Visualizing With Text* by Richard Brath](https://books.google.ca/books/about/Visualizing_with_Text.html?id=dAoHEAAAQBAJ&source=kp_book_description&redir_esc=y), which includes a number of text-based remakes of these same figures, which motivated me to actually carry out this project. I'm pleased that the visualization library I've been working on for the past couple of years, [Plotly Express](https://plotly.express), is now mature enough to let me do a decent job at many of these graphics with just a few lines of code.
 
 
 ## An Intellectual Ancestor
 
-Before getting into the remakes, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the one highlighted below, which the book explains how to interpret or generate. 
+Before getting into the remakes, I want to talk about one neat little feature of this book. Each of these graphics is accompanied by a little glyph, like the one highlighted below, which the book explains how to interpret or generate.
 
 <br />
 <table><tr>
-    <td><img src="glyphs.png" alt="glyphs" style="height: 300px;"/></td>
-    <td><img src="glyphs2.png" alt="glyphs" style="height: 300px;"/></td>
-    <td><img src="glyphs3.png" alt="glyphs" style="height: 300px;"/></td>
+    <td><img src="images/glyphs.png" alt="glyphs" style="height: 300px;"/></td>
+    <td><img src="images/glyphs2.png" alt="glyphs" style="height: 300px;"/></td>
+    <td><img src="images/glyphs3.png" alt="glyphs" style="height: 300px;"/></td>
 </tr></table>
 <br />
 
-Each glyph is basically a very compact graphical specification/explanation of the chart, a kind of meta-legend. The L-shaped portion indicates which data variables are mapped to the X and Y axes (sometimes indicating order with an O character, as in the first figure on the left, ordered by Qt for total quantity), and any additional vertical or horizontal lines outside of that indicates faceting/stacking (lines without a crossbar, as in the lower half of the first image) or cumulative stacking variables (lines with a little crossbar, as in the upper half). Diagonal lines indicate data variables that are embedded into (Geo in the second impage) or mapped to variables that "jump out" of the page, like color, size, value etc (the diagonal line appears to be missing in the top figure of the first image, and Qt is mapped to size in the second image). There are similar little glyphs for pie charts, maps, ternary charts etc. The third image shows the complex glyph for 90 scaled pie charts overlaid on a map: the X/Y dimensions are geography, and the pie charts are stacked by S for sector, cumulatively scaled by Q for quantity, and then sized by Qt for total quantity, and shaded by S for sector.
+Each glyph is basically a very compact graphical specification/explanation of the chart, a kind of meta-legend. The L-shaped portion indicates which data variables are mapped to the horizontal and vertical dimensions of the surface, (sometimes indicating order with an O character, as in the first figure on the left, ordered by Qt for total quantity), and any additional vertical or horizontal lines outside of that indicates faceting/stacking (lines without a crossbar, as in the lower half of the first image) or cumulative stacking variables (lines with a little crossbar, as in the upper half). Note that the horizontal and vertical dimensions are sometimes mapped to X and Y in a 2-d cartesian plot, but sometimes mapped to "Geo" in a map. Diagonal lines indicate data variables that are embedded into (Geo in the second impage) or mapped to variables that "jump out" of the page, like color, size, value etc (the diagonal line appears to be missing in the top figure of the first image, and Qt is mapped to size in the second image). There are similar little glyphs for pie charts, maps, ternary charts etc. The third image shows the complex glyph for 90 scaled pie charts overlaid on a map: the X/Y dimensions are geography, and the pie charts are stacked by S for sector, cumulatively scaled by Q for quantity, and then sized by Qt for total quantity, and shaded by S for sector.
 
 What I find fascinating about these little glyphs is that they are in a way the intellectual ancestors of the code blocks you'll find below, which are used to generate the interactive figures. I don't know if Bertin would sketch these glyphs first, then make the charts, or if he drew them on afterwards, but with modern tools like Plotly Express, we can write just a few lines of code which express the same ideas as these glyphs (in rather less ambiguous form) and the figures just appear! For those who know how to read the code, it also provides a clear specification of the figure. This is possible because the design of these libraries was informed by a line of thinking which originated from this book, i.e. the formalized semiological notion idea that visualization involves a sign-system wherein visual variables (signifiers) are mapped onto data variables (signifieds). The little glyphs I mentioned above were part of the explanation of this mapping. This line of thinking and its relationship to visualization software was further elaborated in a book called [*The Grammar of Graphics* by Leland Wilkinson](https://books.google.ca/books/about/The_Grammar_of_Graphics.html?id=ZiwLCAAAQBAJ&source=kp_book_description&redir_esc=y) in the 90s, and then embedded into multiple subsequent generations of visualization software since, including Plotly Express.
 
@@ -46,7 +46,7 @@ What I find fascinating about these little glyphs is that they are in a way the 
 
 The first step to remaking these figures with Plotly Express was to get the data into a Python-friendly format. The dataset nominally contains only a few columns of numbers, but in order to make maps we actually need some geographic data as well! This is sort of implicit in the book, but when working with code, everything must be made explicit. This was a little bit of a challenge since french administrative divisions have evolved a little bit since 1967, when the book was published, and the data was from 1954. I found [a set of polygons for the boundern boundaries of french departments](https://github.com/gregoiredavid/france-geojson) and modified them as follows, to match the data in the book:
 
-1. I undid [the 1964 reorganization](https://fr.wikipedia.org/wiki/R%C3%A9organisation_de_la_r%C3%A9gion_parisienne_en_1964#/media/Fichier:Ile_de_France_departments_1968_evolution_map-fr.svg) of the Paris-region departments by merging departments 91 and 95 into department 78, and merging 92, 93 and 94 into 75. 
+1. I undid [the 1964 reorganization](https://fr.wikipedia.org/wiki/R%C3%A9organisation_de_la_r%C3%A9gion_parisienne_en_1964#/media/Fichier:Ile_de_France_departments_1968_evolution_map-fr.svg) of the Paris-region departments by merging departments 91 and 95 into department 78, and merging 92, 93 and 94 into 75.
 2. I then subtracted the present-day department 75 (the city of Paris) from the resulting department 75 and labelled it "P", as in the dataset in the book. I believe that Paris was carved out from its surrounding department to avoid department 75 from totally dominating all figures population-wise, although this is not called out in the book specifically.
 3. I dropped Corsica (20) as no data was provided for this island department.
 4. I simplified the geometry of the polygons to reduce the file size and even out some of the inaccuracies I introduced when I merged the Paris-region departments. The simplified polygons have approximately the same level of detail as the maps in the book, which are only rendered a few inches across anyway.
@@ -79,10 +79,9 @@ Finally, we'll load Plotly Express and preconfigure some default values which we
 ```python
 import plotly.express as px
 px.defaults.height=500
+blue, red, green = px.colors.qualitative.Plotly[:3]
 px.defaults.color_discrete_map = {
-    'agriculture': px.colors.sequential.Greens[5], 
-    'industry': px.colors.sequential.Reds[5], 
-    'services': px.colors.sequential.Blues[5],
+    'agriculture': green, 'industry': red, 'services': blue,
     'S>A>I': '#5588BB','S>I>A': '#8855BB','I>S>A': '#BB5588',
     'I>A>S': '#BB8855','A>I>S': '#88BB55','A>S>I': '#55BB88'
 }
@@ -100,7 +99,7 @@ The first figure we'll make is a simple faceted bar chart of the raw counts. Thi
 fig = px.bar(long_df, x="quantity", y="department", color="sector", facet_col="sector", height=600)
 fig.update_layout(bargap=0, showlegend=False)
 fig.update_yaxes(tickfont_size=4, autorange="reversed")
-fig.show()
+fig.show("notebook")
 ```
 
 Here's the same data in a stacked bar chart, which lets us more easily see the total population of each department by looking at the heights of the bar stacks:
@@ -108,17 +107,17 @@ Here's the same data in a stacked bar chart, which lets us more easily see the t
 ```python
 fig = px.bar(long_df, x=long_df.index, y="quantity", color="sector", hover_name="department")
 fig.update_layout(bargap=0, legend_xanchor="right", legend_x=0.99, legend_y=0.99)
-fig.update_xaxes(type="category", tickfont_size=5, tickangle=-90)
+fig.update_xaxes(tickfont_size=5, tickangle=-90, categoryorder="total descending")
 fig.show()
 ```
 
 Here's the same data except each stack has been merged together into a single bar, now colored by the `type` column. Stacks with more blue than red and more red than green are now a blueish purple, for example.
 
 ```python
-fig = px.bar(wide_df, x=wide_df.index, y="total", color="type", hover_name="department", 
+fig = px.bar(wide_df, x=wide_df.index, y="total", color="type", hover_name="department",
              hover_data=["agriculture_pct", "industry_pct", "services_pct"], )
 fig.update_layout(bargap=0, legend_xanchor="right", legend_x=0.99, legend_y=0.99)
-fig.update_xaxes(type="category", tickfont_size=5, tickangle=-90, categoryorder="total descending")
+fig.update_xaxes(tickfont_size=5, tickangle=-90, categoryorder="total descending")
 fig.show()
 ```
 
@@ -130,7 +129,7 @@ fig = px.bar(long_df, x=long_df.index, y="percentage", hover_name="department", 
 
 fig.update_traces(x=wide_df["total"].cumsum()-wide_df["total"], width=wide_df["total"], offset=0)
 fig.update_xaxes(type="linear", tickangle=0, tickfont_size=6,
-                 tickvals=wide_df["total"].cumsum()-wide_df["total"]/2, 
+                 tickvals=wide_df["total"].cumsum()-wide_df["total"]/2,
                  ticktext= ["%s" % l for l in wide_df.index])
 fig.update_layout(bargap=0, barnorm="percent", legend_orientation="h", legend_y=1.1)
 fig.show()
@@ -170,16 +169,22 @@ fig.show()
 ```
 
 ```python
+fig = px.treemap(wide_df, path=[px.Constant("France"), "region", "department"], values="total",
+                 color="services_pct", color_continuous_scale="blues", range_color=[0,75])
+fig.show()
+```
+
+```python
 fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
-                    color="type", hover_name="department", 
+                    color="type", hover_name="department",
                     hover_data=["agriculture_pct", "industry_pct", "services_pct"],
                     fitbounds="geojson", basemap_visible=False, projection="mercator")
 fig.show(config=dict(scrollZoom=False))
 ```
 
 ```python
-fig = px.choropleth(long_df, geojson=long_df.geometry, locations=long_df.index, 
-                    color="percentage", facet_col="sector", hover_name="department", 
+fig = px.choropleth(long_df, geojson=long_df.geometry, locations=long_df.index,
+                    color="percentage", facet_col="sector", hover_name="department",
                     fitbounds="geojson", basemap_visible=False, projection="mercator",
                     height=400
                    )
@@ -207,9 +212,9 @@ fig.show(config=dict(scrollZoom=False))
 ```
 
 ```python
-fig = px.scatter_geo(long_df, geojson=long_df.geometry, locations=long_df.index, 
+fig = px.scatter_geo(long_df, geojson=long_df.geometry, locations=long_df.index,
                      size="quantity", facet_col="sector", color="sector",
-                     opacity=.8, hover_name="department", size_max=30, 
+                     opacity=.8, hover_name="department", size_max=30,
                      fitbounds="geojson", basemap_visible=False, projection="mercator",
                     height=400)
 
@@ -219,14 +224,8 @@ fig.show(config=dict(scrollZoom=False))
 ```
 
 ```python
-fig = px.treemap(wide_df, path=[px.Constant("France"), "region", "department"], values="total",
-                 color="services_pct", color_continuous_scale="blues", range_color=[0,75])
-fig.show()
-```
-
-```python
 points_df = gpd.read_file("semiology_of_graphics_points.geojson").melt(
-    id_vars=["code", "geometry", "department"], 
+    id_vars=["code", "geometry", "department"],
     value_vars=["agriculture", "industry", "services"],
     var_name="sector", value_name="quantity"
 )
@@ -235,11 +234,12 @@ points_df["label"] = points_df["code"].apply(lambda d: d if d in ["P", "75"] els
 
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
                      size="quantity", facet_col="sector", size_max=30,  opacity=.8,
-                     color_discrete_sequence=["#333333"],
+                     color="sector",
                      hover_name="department", text="label", hover_data=dict(label=False),
                      fitbounds="geojson", basemap_visible=False, projection="mercator")
 
 fig.update_traces(textposition="bottom center")
+fig.update_layout(showlegend=False)
 fig.add_trace(basepolygons, row="all", col="all")
 fig.show(config=dict(scrollZoom=False))
 ```
@@ -251,7 +251,7 @@ fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry
                      hover_name="department",
                      hover_data=dict(label=False),
                      fitbounds="geojson", basemap_visible=False, projection="mercator")
-
+fig.update_traces(marker_line_width=0.5)
 fig.data = fig.data[::-1]
 
 for i, t in enumerate(fig.data):
