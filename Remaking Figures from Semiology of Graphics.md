@@ -14,7 +14,7 @@ jupyter:
 ---
 
 # Remaking Figures from <br>Bertin's *Semiology of Graphics*
-<p style="text-align: center">by <a target="_blank" href="https://nicolas.kruchten.com/">Nicolas Kruchten</a></p>
+<p style="text-align: center">by <a target="_blank" href="https://nicolas.kruchten.com/">Nicolas Kruchten</a>, December 2020</p>
 
 One of my favourite books about data visualization is [*Semiology of Graphics: Diagrams, Networks, Maps* by Jacques Bertin](https://books.google.ca/books/about/Semiology_of_Graphics.html?id=X5caQwAACAAJ&source=kp_book_description&redir_esc=y), from 1967. It's a dense, 450-page tome which is now considered a classic in the development of the field. Michael Friendly, in his [Brief History of Data Visualization](http://datavis.ca/papers/hbook.pdf), identifies it as one of three key factors in the late-20th century renaissance in data visualization (following a golden age in the 19th century and a dark age in the early 20th).
 
@@ -243,7 +243,7 @@ fig.show()
 
 ### Cartograms and Treemaps
 
-After dimissing "chartmaps" (see below under "not remade") the book touches on cartograms: maps distorted such that the area of a given department is proportional to its population, say, while roughly maintaining the position of departments to each other. Here is one example from the book:
+After dismissing "chartmaps" (see below under "not remade") the book touches on cartograms: maps distorted such that the area of a given department is proportional to its population, say, while roughly maintaining the position of departments to each other. Here is one example from the book:
 
 <a target="_blank" href="images/cartogram.png"><img src="images/cartogram.png" style="width: 300px;"></a>
 
@@ -263,7 +263,7 @@ The book includes a number of maps where the department polygons are shaded or t
 
 <a target="_blank" href="images/texture_map.png"><img src="images/texture_map.png" style="width: 300px;"></a>
 
-In lieu of overlaid textures, here I've made a simple categorical choropleth where each department is colored by its `type`, which finally reveals some of the geographic pattern behind these types although, as Bertin points out, this map alone leaves out the actual distribution of population.
+In lieu of overlaid textures, here I've made a simple categorical choropleth where each department is colored by its `type`, which finally reveals some of the geographic pattern behind these types although, as Bertin points out, this map alone leaves out the actual distribution of population. Note also that the Paris and Seine departments, although the most populous, are almost invisible here.
 
 ```python
 fig = px.choropleth(wide_df, geojson=wide_df.geometry, locations=wide_df.index,
@@ -363,7 +363,7 @@ The corresponding map from the book uses a unique blue/magenta/black color schem
 <a target="_blank" href="images/stipple_map.png"><img src="images/stipple_map.png" style="width: 300px;"></a>
 
 <br />
-Although this final map is very busy and a bit hard to look at, I actually think it makes it easier to simultaneously understand all the patterns than to flick my eyes back and forth across the three panels above. I'm not sure I would recommend it for general audiences or for other datasets though, as it probably doesn't scale very well to larger areas or more data series etc.
+Although this final map is very busy and a bit hard to look at, I actually think it makes it easier to simultaneously understand all the patterns than to flick my eyes back and forth across the three panels above. I'm not sure I would recommend it for general audiences or for other datasets though, as it probably doesn't scale very well to larger areas or more data series etc. The colorblindness issue with the colours I've chosen is also more problematic in this map. 
 
 ```python
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
