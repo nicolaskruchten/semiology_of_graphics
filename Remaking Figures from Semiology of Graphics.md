@@ -20,7 +20,7 @@ One of my favourite books about data visualization is [*Semiology of Graphics: D
 
 One of my favourite parts of the book is a 40-page section called "The Graphic Problem", which enumerates by example 100 different visualizations of the same compact dataset, to outline what we would now call the design space of visualizations, and to forcefully make the point that the choice of which visualization to use for a given dataset is far from obvious, and that the visualization used must match the questions it should be used to answer. The dataset, which is printed in a small table at the beginning of the section, is quite simple on its face: the number of people working in agriculture, industry and services for each of 90 administrative divisions in France in 1954 (there are four other, derived columns: the sum of the first three, and each of the first three divided by the sum).
 
-I don't think I can reasonably reproduce the entire section at high resolution here, but I'm including an overview of 32 of those pages, which should give a sense of the breadth of visual forms covered. There are bar charts (faceted, stacked, reordered, variable-width), histograms, concentration curves, scatterplots and scatterplot matrices, a parallel-coordinates plot, some ternary plots, and that's before we even get to maps. There are cartograms and graduated-symbol maps and contour maps and dot maps and choropleths and maps with pies and bars on them, and some stippled and striped maps that I don't believe have common names, as I've only ever seen them in this book!
+I don't think I can reasonably reproduce the entire section at high resolution here, but I'm including an overview of 32 of those pages, which should give a sense of the breadth of visual forms covered. There are bar charts (faceted, stacked, reordered, variable-width), histograms, concentration curves, scatterplots and scatterplot matrices, a parallel-coordinates plot, some ternary plots, and that's before we even get to maps. There are cartograms and graduated-symbol maps and contour maps and dot maps and choropleths and maps with pies and bars on them, and some stippled and striped maps that I don't believe have common names, as I've only ever seen them in this book.
 
 <a target="_blank" href="images/spread.png"><img src="images/spread.png"></a>
 
@@ -39,14 +39,14 @@ Before getting into the figures and code, I want to talk about one neat little f
 </tr></table>
 <br />
 
-Each glyph is basically a very compact graphical specification/explanation of the chart, a kind of meta-legend. The L-shaped portion indicates which data variables are mapped to the horizontal and vertical dimensions of the surface, (sometimes indicating order with an O character, as in the first figure on the left, ordered by Qt for total quantity), and any additional vertical or horizontal lines outside of that indicates faceting/stacking (lines without a crossbar, as in the lower half of the first image) or cumulative stacking variables (lines with a little crossbar, as in the upper half). Note that the horizontal and vertical dimensions are sometimes mapped to X and Y in a 2-d cartesian plot, but sometimes mapped to "Geo" in a map. Diagonal lines indicate data variables that are embedded into (Geo in the second impage) or mapped to variables that "jump out" of the page, like color, size, value etc (the diagonal line appears to be missing in the top figure of the first image, and Qt is mapped to size in the second image). There are similar little glyphs for pie charts, maps, ternary charts etc. The third image shows the complex glyph for 90 scaled pie charts overlaid on a map: the X/Y dimensions are geography, and the pie charts are stacked by S for sector, cumulatively scaled by Q for quantity, and then sized by Qt for total quantity, and shaded by S for sector.
+Each glyph is basically a very compact graphical specification/explanation of the chart, a kind of meta-legend. The L-shaped portion indicates which data variables are mapped to the horizontal and vertical dimensions of the surface. Sometimes order is indicated with an O character, as in the first figure on the left, ordered by Qt for total quantity. Any additional vertical or horizontal lines outside of that indicates faceting/stacking (lines without a crossbar, as in the lower half of the first image) or cumulative stacking variables (lines with a little crossbar, as in the upper half). Note that the horizontal and vertical dimensions are sometimes mapped to X and Y in a 2-d cartesian plot, but sometimes mapped to "Geo" in a map. Diagonal lines indicate data variables that are embedded into (Geo in the second impage) or mapped to variables that "jump out" of the page, like color, size, value etc. The diagonal line appears to be missing in the top figure of the first image, and Qt is mapped to size in the second image. There are similar little glyphs for pie charts, maps, ternary charts etc. The third image shows the complex glyph for 90 scaled pie charts overlaid on a map: the X/Y dimensions are geography, and the pie charts are stacked by S for sector, cumulatively scaled by Q for quantity, and then sized by Qt for total quantity, and shaded by S for sector.
 
 What I find fascinating about these little glyphs is that they are in a way the intellectual ancestors of the code blocks you'll find below, which are used to generate the interactive figures. I don't know if Bertin would sketch these glyphs first, then make the charts, or if he drew them on afterwards, but with modern tools like Plotly Express, we can write just a few lines of code which express the same ideas as these glyphs (in rather less ambiguous form) and the figures just appear! For those who know how to read the code, it also provides a clear specification of the figure. This is possible because the design of these libraries was informed by a line of thinking which originated from this book, i.e. the formalized semiological notion idea that visualization involves a sign-system wherein visual variables (signifiers) are mapped onto data variables (signifieds). The little glyphs I mentioned above were part of the explanation of this mapping. This line of thinking and its relationship to visualization software was further elaborated in a book called [*The Grammar of Graphics* by Leland Wilkinson](https://books.google.ca/books/about/The_Grammar_of_Graphics.html?id=ZiwLCAAAQBAJ&source=kp_book_description&redir_esc=y) in the 90s, and then embedded into multiple subsequent generations of visualization software since, including Plotly Express.
 
 
 ## Data and Setup
 
-The first step to remaking these figures with Plotly Express was to get the data into a Python-friendly format. The dataset nominally contains only a few columns of numbers, but in order to make maps we actually need some geographic data as well! This is sort of implicit in the book, but when working with code, everything must be made explicit. This was a little bit of a challenge since french administrative divisions have evolved a little bit since 1967, when the book was published, and the data was from 1954. I found [a set of polygons for the boundern boundaries of french departments](https://github.com/gregoiredavid/france-geojson) and modified them as follows, to match the data in the book:
+The first step to remaking these figures with Plotly Express was to get the data into a Python-friendly format. The dataset nominally contains only a few columns of numbers, but in order to make maps we actually need some geographic data as well. This is sort of implicit in the book, but when working with code, everything must be made explicit. This was a little bit of a challenge since French administrative divisions have evolved a little bit since 1967, when the book was published, and the data was from 1954. I found [a set of polygons for the modern boundaries of French departments](https://github.com/gregoiredavid/france-geojson) and modified them as follows, to match the data in the book:
 
 1. I undid [the 1964 reorganization](https://fr.wikipedia.org/wiki/R%C3%A9organisation_de_la_r%C3%A9gion_parisienne_en_1964#/media/Fichier:Ile_de_France_departments_1968_evolution_map-fr.svg) of the Paris-region departments by merging departments 91 and 95 into department 78, and merging 92, 93 and 94 into 75.
 2. I then subtracted the present-day department 75 (the city of Paris) from the resulting department 75 and labelled it "P", as in the dataset in the book. I believe that Paris was carved out from its surrounding department to avoid department 75 from totally dominating all figures population-wise, although this is not called out in the book specifically.
@@ -114,9 +114,9 @@ I've arranged the figures I made in roughly the same order as they appear in the
 
 ### Bars
 
-The book begins by showing the various ways you can visualize the dataset using bar charts, starting with a simple horizontal bar chart of the absolute counts, faceted by sector, like the one below. This figure is *interactive* in that you can hover over any bar to see the details of the data it encodes, which goes some way towards mitigating the legibility issues of the tiny font used in the labels (a problem in the book also!)
+The book begins by showing the various ways you can visualize the dataset using bar charts, starting with a simple horizontal bar chart of the absolute counts, faceted by sector, like the one below. This figure is *interactive* in that you can hover over any bar to see the details of the data it encodes, which goes some way towards mitigating the legibility issues of the tiny font used in the labels (a problem in the book also).
 
-A note on color: the book uses color sparingly and only on certain pages, presumably for cost reasons. I'll mostly be consistently using a green/red/blue color scheme because it's visually a bit more interesting, and because color is free on computer screens. I also use color in places where the book uses value or crosshatching.
+A note on color: the book uses color sparingly and only on certain pages, presumably for cost reasons. I'll mostly be consistently using a green/red/blue color scheme because it's visually a bit more interesting, and because color is free on computer screens. I also use color in places where the book uses value or crosshatching. (Note: the colors I've used here are not great from an accessibility/colorblind-friendliness perspective.)
 
 This first figure is not all that much more helpful at understanding patterns in the data than the original table, other than giving a sense of the great disparity in magnitude between the biggest and smallest numbers: roughly two orders of magnitude.
 
@@ -192,7 +192,7 @@ A more interesting figure in the book that uses lines is actually what we would 
 
 <a target="_blank" href="images/parcoords.png"><img src="images/parcoords.png" style="width: 300px;"></a>
 
-In the figure below I use slightly different dimensions: the *percentage* of workers in each sector and the total population of the department. Lines are colored by the percentage of workers in industry in varying intensities of red. Try drag-selecting the dimensions to select/deselect lines! You can see that broadly speaking, smaller departments do tend to be more agricultural.
+In the figure below I use slightly different dimensions: the *percentage* of workers in each sector and the total population of the department. Lines are colored by the percentage of workers in industry in varying intensities of red. Try drag-selecting the dimensions to select/deselect lines. You can see that broadly speaking, smaller departments do tend to be more agricultural.
 
 ```python
 fig = px.parallel_coordinates(wide_df, dimensions=["agriculture_pct", "industry_pct", "services_pct", "total"],
@@ -259,7 +259,7 @@ fig.show()
 
 ## Department Polygons
 
-The book includes a number of maps where the department polygons are shaded or textured to indicate their composition. My favourite example is the one below, which overlays three separate types of texture and is not possible to reproduce with Plotly Express at the moment (or, to be honest, likely ever!):
+The book includes a number of maps where the department polygons are shaded or textured to indicate their composition. My favourite example is the one below, which overlays three separate types of texture and is not possible to reproduce with Plotly Express at the moment (or, to be honest, likely ever):
 
 <a target="_blank" href="images/texture_map.png"><img src="images/texture_map.png" style="width: 300px;"></a>
 
@@ -314,7 +314,7 @@ fig.show(config=dict(scrollZoom=False))
 
 The book displays the figure above with all-black points, alongside the the three panels below which are broken out by sector, so as to show more completely the overall distribution of population and how it breaks out by sector.
 
-The primary critique of this approach in the book is that even though french departments are roughly evenly-sized, it's hard to directly perceive population *densities* in these figures. This point is addressed in the next figures.
+The primary critique of this approach in the book is that even though French departments are roughly evenly-sized, it's hard to directly perceive population *densities* in these figures. This point is addressed in the next figures.
 
 ```python
 fig = px.scatter_geo(long_df, geojson=long_df.geometry, locations=long_df.index,
@@ -363,7 +363,7 @@ The corresponding map from the book uses a unique blue/magenta/black color schem
 <a target="_blank" href="images/stipple_map.png"><img src="images/stipple_map.png" style="width: 300px;"></a>
 
 <br />
-Although this final map is very busy and a bit hard to look at, I actually think it makes it easier to simultaneously understand all the patterns than to flick my eyes back and forth across the three panels above. I'm not sure I would recommend it for general audiences or for other datasets though, as it probably doesn't scale very well to larger areas or more data series etc!
+Although this final map is very busy and a bit hard to look at, I actually think it makes it easier to simultaneously understand all the patterns than to flick my eyes back and forth across the three panels above. I'm not sure I would recommend it for general audiences or for other datasets though, as it probably doesn't scale very well to larger areas or more data series etc.
 
 ```python
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
@@ -393,7 +393,7 @@ As I wrote at the top, this section of *Semiology of Graphics* includes around 1
 </tr></table>
 <br />
 
-I chose to skip some figures for brevity, and some because Plotly Express doesn't support making such figures without resorting to dozens of lines of code, which would really push the "A few lines of Plotly Express code are like the explanatory glyph" analogy I made at the top to its breaking point! I've provided the data files I used in [the Github repository for this project](https://github.com/nicolaskruchten/semiology_of_graphics), however, so if someone is excited about remaking these figures with their favourite vis tools, I'd be thrilled to see more remakes!
+I chose to skip some figures for brevity, and some because Plotly Express doesn't support making such figures without resorting to dozens of lines of code, which would really push the "A few lines of Plotly Express code are like the explanatory glyph" analogy I made at the top to its breaking point. I've provided the data files I used in [the Github repository for this project](https://github.com/nicolaskruchten/semiology_of_graphics), however, so if someone is excited about remaking these figures with their favourite vis tools, I'd be thrilled to see more remakes!
 
 
 ## Conclusion
