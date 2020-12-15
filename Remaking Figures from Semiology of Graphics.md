@@ -16,7 +16,7 @@ jupyter:
 # Remaking Figures from <br>Bertin's *Semiology of Graphics*
 <p style="text-align: center">by <a target="_blank" href="https://nicolas.kruchten.com/">Nicolas Kruchten</a></p>
 
-One of my favourite books about data visualization is [*Semiology of Graphics: Diagrams, Networks, Maps* by Jacques Bertin](https://books.google.ca/books/about/Semiology_of_Graphics.html?id=X5caQwAACAAJ&source=kp_book_description&redir_esc=y), from 1967. It's a dense, 450-page tome which is now considered a classic in the development of the field. Michael Friendly, in his [Brief History of Data Visualization](http://datavis.ca/papers/hbook.pdf), identifies it as one of three key factors in the late-20th century renaissance in data visualization (following a golden age in the 19th century and a dark age in the early 20th). 
+One of my favourite books about data visualization is [*Semiology of Graphics: Diagrams, Networks, Maps* by Jacques Bertin](https://books.google.ca/books/about/Semiology_of_Graphics.html?id=X5caQwAACAAJ&source=kp_book_description&redir_esc=y), from 1967. It's a dense, 450-page tome which is now considered a classic in the development of the field. Michael Friendly, in his [Brief History of Data Visualization](http://datavis.ca/papers/hbook.pdf), identifies it as one of three key factors in the late-20th century renaissance in data visualization (following a golden age in the 19th century and a dark age in the early 20th).
 
 One of my favourite parts of the book is a 40-page section called "The Graphic Problem", which enumerates by example 100 different visualizations of the same compact dataset, to outline what we would now call the design space of visualizations, and to forcefully make the point that the choice of which visualization to use for a given dataset is far from obvious, and that the visualization used must match the questions it should be used to answer. The dataset, which is printed in a small table at the beginning of the section, is quite simple on its face: the number of people working in agriculture, industry and services for each of 90 administrative divisions in France in 1954 (there are four other, derived columns: the sum of the first three, and each of the first three divided by the sum).
 
@@ -188,7 +188,7 @@ fig.update_layout(legend_x=0.01, legend_y=0.99)
 fig.show()
 ```
 
-A more interesting figure in the book that uses lines is actually what we would now call a parallel coordinates chart, a name that was popularized in the 80s. The figure in the book is reproduced here, and visualizes each department as a single line that zigzags through three dimensions: the rank of each department by sector (agriculture – sector I – is repeated to clarify the pattern). 
+A more interesting figure in the book that uses lines is actually what we would now call a parallel coordinates chart, a name that was popularized in the 80s. The figure in the book is reproduced here, and visualizes each department as a single line that zigzags through three dimensions: the rank of each department by sector (agriculture – sector I – is repeated to clarify the pattern).
 
 <a target="_blank" href="images/parcoords.png"><img src="images/parcoords.png" style="width: 300px;"></a>
 
@@ -202,7 +202,7 @@ fig.show()
 ```
 ### Points
 
-After bars and lines the book moves on to using points as marks by making scatterplots. The next figure doesn't appear in the book, but it's a scatterplot of percentage vs the log of total population, faceted by sector. It shows that there is indeed a weak negative relationship between size and agriculture. Plotly Express' scatterplots afford hovering, unlike its parallel coordinates plots, so it's easier to identify the the high-industry/low-total-population deparment that shows up as the darkest line above as Belfort.
+After bars and lines the book moves on to using points as marks by making scatterplots. The next figure doesn't appear in the book, but it's a scatterplot of percentage vs the log of total population, faceted by sector. It shows that there is indeed a weak negative relationship between size and agriculture. Plotly Express' scatterplots afford hovering, unlike its parallel coordinates plots, so it's easier to identify the the high-industry/low-total-population department that shows up as the darkest line above as Belfort.
 
 ```python
 fig = px.scatter(long_df, x="total", y="percentage", color="sector", facet_col="sector",
@@ -332,7 +332,7 @@ fig.show(config=dict(scrollZoom=False))
 
 To reveal population densities, Bertin proposes to use points not one-per-department, but on a regular grid (dividing the departmental quantities among the points that lie within departmental boundaries).
 
-I've separately-computed this grid of points and stored it in its [own GeoJSON file](data/semiology_of_graphics_points.geojson). Some special treatment for the Paris (P) and Seine (75) regions was necessary as those departments are simultaneously so small that the grid pattern didn't place any dots there, and so populous that their points overwhelm their surroundings. In the figures below I deal with the problem of the density of the Paris region in the same way as some of the maps in the book, by moving the corresponding points northeast, somewhere floating over Belgium. 
+I've separately-computed this grid of points and stored it in its [own GeoJSON file](data/semiology_of_graphics_points.geojson). Some special treatment for the Paris (P) and Seine (75) regions was necessary as those departments are simultaneously so small that the grid pattern didn't place any dots there, and so populous that their points overwhelm their surroundings. In the figures below I deal with the problem of the density of the Paris region in the same way as some of the maps in the book, by moving the corresponding points northeast, somewhere floating over Belgium.
 
 ```python
 points_df = gpd.read_file("data/semiology_of_graphics_points.geojson").melt(
@@ -345,8 +345,8 @@ points_df["label"] = points_df["code"].apply(lambda d: d if d in ["P", "75"] els
 
 fig = px.scatter_geo(points_df, lat=points_df.geometry.y, lon=points_df.geometry.x,
                      size="quantity", facet_col="sector", size_max=30,  opacity=.8,
-                     color="sector", hover_name="department", text="label", 
-                     hover_data=dict(label=False), fitbounds="geojson", 
+                     color="sector", hover_name="department", text="label",
+                     hover_data=dict(label=False), fitbounds="geojson",
                      basemap_visible=False, projection="mercator")
 
 fig.update_traces(textposition="bottom center")
@@ -355,7 +355,7 @@ fig.add_trace(basepolygons, row="all", col="all")
 fig.show(config=dict(scrollZoom=False))
 ```
 
-Finally, I remake one of the maps I find the most striking. The figure above simultaneously displays absolute populations per sector and densities, but forces the viewer to scan back and forth to build a sense of the relative importance of one sector vs another in a particular area. This final map addresses this problem by overlaying the three panels above, with a slight offset. 
+Finally, I remake one of the maps I find the most striking. The figure above simultaneously displays absolute populations per sector and densities, but forces the viewer to scan back and forth to build a sense of the relative importance of one sector vs another in a particular area. This final map addresses this problem by overlaying the three panels above, with a slight offset.
 
 The corresponding map from the book uses a unique blue/magenta/black color scheme, and is a bit more attractive than mine as it uses a triangular grid rather than a square one.
 
@@ -388,8 +388,8 @@ As I wrote at the top, this section of *Semiology of Graphics* includes around 1
 
 <br />
 <table><tr>
-    <td><a target="_blank" href="images/glyphs.png"><img src="images/chartmaps.png" alt="glyphs" style="width: 300px;"/></a></td>
-    <td><a target="_blank" href="images/glyphs2.png"><img src="images/stripes.png" alt="glyphs" style="width: 300px;"/></a></td>
+    <td><a target="_blank" href="images/chartmaps.png"><img src="images/chartmaps.png" alt="glyphs" style="width: 300px;"/></a></td>
+    <td><a target="_blank" href="images/stripes.png"><img src="images/stripes.png" alt="glyphs" style="width: 300px;"/></a></td>
 </tr></table>
 <br />
 
