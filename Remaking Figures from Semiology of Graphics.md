@@ -332,7 +332,7 @@ fig.show(config=dict(scrollZoom=False))
 
 To reveal population densities, Bertin proposes to use points not one-per-department, but on a regular grid (dividing the departmental quantities among the points that lie within departmental boundaries).
 
-I've separately-computed this grid of points and stored it in its [own GeoJSON file](data/semiology_of_graphics_points.geojson). Some special treatment for the Paris (P) and Seine (75) regions was necessary as those departments are simultaneously so small that the grid pattern didn't place any dots there, and so populous that their points overwhelm their surroundings. In the figures below I deal with the problem of the density of the Paris region in the same way as some of the maps in the book, by moving the corresponding points northeast, somewhere floating over Belgium.
+I've [separately-computed this grid of points](https://github.com/nicolaskruchten/semiology_of_graphics/blob/master/generate_points.ipynb) and stored it in its [own GeoJSON file](data/semiology_of_graphics_points.geojson). Some special treatment for the Paris (P) and Seine (75) regions was necessary as those departments are simultaneously so small that the grid pattern didn't place any dots there, and so populous that their points overwhelm their surroundings. In the figures below I deal with the problem of the density of the Paris region in the same way as some of the maps in the book, by moving the corresponding points northeast, somewhere floating over Belgium.
 
 ```python
 points_df = gpd.read_file("data/semiology_of_graphics_points.geojson").melt(
